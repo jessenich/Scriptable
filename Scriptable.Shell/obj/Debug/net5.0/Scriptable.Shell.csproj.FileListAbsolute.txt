@@ -1,0 +1,12 @@
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/bin/Debug/net5.0/Scriptable.Shell.deps.json
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/bin/Debug/net5.0/Scriptable.Shell.dll
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/bin/Debug/net5.0/ref/Scriptable.Shell.dll
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/bin/Debug/net5.0/Scriptable.Shell.pdb
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/Debug/net5.0/Scriptable.Shell.csproj.AssemblyReference.cache
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/Debug/net5.0/Scriptable.Shell.GeneratedMSBuildEditorConfig.editorconfig
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/Debug/net5.0/Scriptable.Shell.AssemblyInfoInputs.cache
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/Debug/net5.0/Scriptable.Shell.AssemblyInfo.cs
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/Debug/net5.0/Scriptable.Shell.csproj.CoreCompileInputs.cache
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/Debug/net5.0/Scriptable.Shell.dll
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/Debug/net5.0/ref/Scriptable.Shell.dll
+/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/Debug/net5.0/Scriptable.Shell.pdb

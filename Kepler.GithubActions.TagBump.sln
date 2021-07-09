@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kepler.GithubActions.TagBump", "Kepler.GithubActions.TagBump\Kepler.GithubActions.TagBump.csproj", "{4FA7EE56-53F2-4FEE-AC6F-BBF084071513}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriptable", "Scriptable\Scriptable.csproj", "{42DA219D-FC59-4A7F-9D00-BE268165CE7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriptable.Shell", "Scriptable.Shell\Scriptable.Shell.csproj", "{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4FA7EE56-53F2-4FEE-AC6F-BBF084071513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FA7EE56-53F2-4FEE-AC6F-BBF084071513}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FA7EE56-53F2-4FEE-AC6F-BBF084071513}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FA7EE56-53F2-4FEE-AC6F-BBF084071513}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42DA219D-FC59-4A7F-9D00-BE268165CE7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42DA219D-FC59-4A7F-9D00-BE268165CE7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42DA219D-FC59-4A7F-9D00-BE268165CE7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42DA219D-FC59-4A7F-9D00-BE268165CE7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

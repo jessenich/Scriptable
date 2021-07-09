@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v5.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "Scriptable.Shell/1.0.0": {
+        "runtime": {
+          "Scriptable.Shell.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Scriptable.Shell/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

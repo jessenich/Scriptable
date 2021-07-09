@@ -1,0 +1,116 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable/Scriptable.csproj": {}
+  },
+  "projects": {
+    "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/Scriptable.Shell.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/Scriptable.Shell.csproj",
+        "projectName": "Scriptable.Shell",
+        "projectPath": "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/Scriptable.Shell.csproj",
+        "packagesPath": "/Volumes/SEAGATE4TB/.nuget/packages/global",
+        "outputPath": "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/jesse/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.301/RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable/Scriptable.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable/Scriptable.csproj",
+        "projectName": "Scriptable",
+        "projectPath": "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable/Scriptable.csproj",
+        "packagesPath": "/Volumes/SEAGATE4TB/.nuget/packages/global",
+        "outputPath": "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/jesse/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/Scriptable.Shell.csproj": {
+                "projectPath": "/Users/jesse/Development/RiderProjects/Kepler.GithubActions.TagBump/Scriptable.Shell/Scriptable.Shell.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.301/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
