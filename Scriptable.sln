@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriptable", "src/Scriptable/Scriptable.csproj", "{42DA219D-FC59-4A7F-9D00-BE268165CE7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriptable", "src\Scriptable\Scriptable.csproj", "{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriptable.Shell", "src/Scriptable.Shell/Scriptable.Shell.csproj", "{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriptable.Test", "test\Scriptable.Test\Scriptable.Test.csproj", "{EDC9189A-B627-4268-B0FA-48C5A89921B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,13 +10,13 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{42DA219D-FC59-4A7F-9D00-BE268165CE7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42DA219D-FC59-4A7F-9D00-BE268165CE7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42DA219D-FC59-4A7F-9D00-BE268165CE7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42DA219D-FC59-4A7F-9D00-BE268165CE7B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

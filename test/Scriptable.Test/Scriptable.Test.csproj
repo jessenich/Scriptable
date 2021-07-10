@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <Title>Scriptable.Test</Title>
+      <TargetFramework>net5.0</TargetFramework>
+      <IsPackable>false</IsPackable>
+      <LangVersion>Latest</LangVersion>
+      <Nullable>enable</Nullable>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+      <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="nunit" Version="3.13.2" />
+      <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+      <PackageReference Include="Moq" Version="4.16.1" />
+      <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+      <PackageReference Include="System.Management" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Scriptable\Scriptable.csproj" />
+  </ItemGroup>
+  
+</Project>
