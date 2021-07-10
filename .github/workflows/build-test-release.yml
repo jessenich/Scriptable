@@ -35,7 +35,7 @@ jobs:
           dotnet-version: 5.0.x
 
       - name: Build, Test, Publish, Pack
-        run: |
+        run: >
           dotnet restore \
             --nologo \
             --configuration ${{ env.RELEASE_CONFIGURATION }} \
@@ -115,10 +115,10 @@ jobs:
               --configuration ${{ env.RELEASE_CONFIGURATION }} \
               --force \
               ${{ env.PROJECT }}
-      env:
-        - RELEASE_CONFIGURATION: Debug
-        - PROJECT: ./src/Scriptable/Scriptable.csproj
-        - TEST: ./tests/SCriptable.Test/Scriptable.Test.csproj
+        env:
+          RELEASE_CONFIGURATION: Debug
+          PROJECT: ./src/Scriptable/Scriptable.csproj
+          TEST: ./tests/SCriptable.Test/Scriptable.Test.csproj
         
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v2
