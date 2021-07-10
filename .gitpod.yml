@@ -1,0 +1,56 @@
+image: gitpod/workspace-full
+
+github:
+  prebuilds:
+    master: true
+    branches: true
+    pullRequests: true
+    pullRequestsFromForks: true
+    addCheck: true
+    addComment: true
+    addBadge: true
+    addLabel: prebuilt-in-gitpod
+    
+  ports:
+      # Http Port    
+    - port: 5000
+      onOpen: notify
+      visibility: private
+      
+      # Https Port
+    - port: 5001
+      onOpen: notify
+      visibilitt: private
+      
+      # gRPC Kestrel Port for MacOS Compatibility
+    - port: 5002
+      onOpen: notify
+      visibilitt: private
+      
+  tasks:
+    - name: Initialize Project  
+      before: dotnet restore ./Scriptable.sln --configuration "${RELEASE_CONFIGURATION}"
+      init: dotnet build ./Scriptable.sln --no-restore --nologo --configuration "${RELEASE_CONFIGURATION}"
+      command: |
+        dotnet test ./test/Scriptable.Test/Scriptable.Test.csproj \
+          --no-restore \
+          --nologo \
+          --configuration "${RELEASE_CONFIGURATION}" \
+          --logger "html;LogFileName=./test/logs/scriptable-test-logfile.html" \
+          --results-directory ./test/results
+      env:
+        RELEASE_CONFIGURATION: Debug
+      openMode: tab-after
+      
+  vscode:
+    extensions:
+      - ms-azuretools.vscode-azurefunctions
+      - ms-azuretools.vscode-docker
+      - CodeStream.codestream
+      - tintoy.msbuild-project-tools
+      - jsw.csharpextensions
+      - cschleiden.vscode-github-actions
+      - bierner.markdown-preview-github-styles
+        
+
+  workspaceLocation: "."

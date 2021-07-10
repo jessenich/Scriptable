@@ -37,16 +37,17 @@ jobs:
       - name: Build, Test, Publish, Pack
         run: |
           dotnet restore \
+            --nologo \
             --configuration ${{ env.RELEASE_CONFIGURATION }}
           
           dotnet build \ 
-            --no-logo \ 
+            --nologo \ 
             --no-restore \
             --configuration ${{ env.RELEASE_CONFIGURATION }}
 
           dotnet test --list-tests
           dotnet test \
-              --no-logo
+              --nologo
               --no-build \
               --verbosity detailed \
               --configuration ${{ env.RELEASE_CONFIGURATION }} \
@@ -54,7 +55,7 @@ jobs:
               --results-directory results
           
           dotnet publish \
-            --no-logo \
+            --nologo \
             --no-build \
             --no-self-contained \
             --configuration ${{ env.RELEASE_ONFIGURATION }}
@@ -62,7 +63,7 @@ jobs:
             --verbosity detailed
 
           dotnet publish \
-            --no-logo \
+            --nologo \
             --no-build \
             --no-restore \
             --self-contained \

@@ -1,3 +1,7 @@
+# Scriptable
+
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/jessenich/scriptable)
+
 ## API Overview
 
 ### Commands
@@ -5,7 +9,7 @@
 The `Command` class represents an executing process:
 ```C#
 // create a command via Command.Run
-var command = Command.Run("executable", "arg1", "arg2", ...);
+var command = Command.Run("git", "commit", "-S", "-m", "\"init repo\"", ...);
 
 // wait for it to finish
 command.Wait(); // or...
@@ -13,8 +17,7 @@ var result = command.Result; // or...
 result = await command.Task;
 
 // inspect the result
-if (!result.Success)
-{
+if (!result.Success) {
     Console.Error.WriteLine($"command failed with exit code {result.ExitCode}: {result.StandardError}");
 }
 ```
@@ -22,9 +25,9 @@ The `Command.Task` property means that you can easily compose the `Command`'s ex
 
 Most APIs create a `Command` instance by starting a new process. However, you can also create a `Command` from an existing process via the `Command.TryAttachToProcess` API.
 
-### Standard IO
+### Streams and StdIn/Out/Error
 
-One of the main ways to interact with a process is via its [standard IO streams](https://en.wikipedia.org/wiki/Standard_streams) (in, out and error). By default, MedallionShell configures the process to enable these streams and captures standard error and standard output in the `Command`'s result.
+One of the main ways to interact with a process is via its [standard IO streams](https://en.wikipedia.org/wiki/Standard_streams) (in, out and error). By default, Scriptable configures the process to enable these streams and captures standard error and standard output in the `Command`'s result.
 
 Additionally/alternatively, you can interact with these streams directly via the `Command.StandardInput`, `Command.StandardOutput`, and `Command.StandardError` properties. As with `Process`, these are `TextWriter`/`TextReader` objects that also expose the underlying `Stream`, giving you the option of writing/reading either text or raw bytes.
 
@@ -36,6 +39,7 @@ command.StandardOutput.PipeToAsync(outputLines); // pipe output text to a collec
 ```
 
 You can also express piping directly on the `Command` object. This returns a new `Command` instance which represents both the underlying process execution and the IO piping operation, providing one thing you can await to know when everything has completed. You can even use this feature to chain together commands (like the `|` operator on the command line).
+
 ```C#
 await Command.Run("processingStep1.exe")
 	.RedirectFrom(new FileInfo("input.txt"))
@@ -54,6 +58,7 @@ You can immediately terminate a command with the `Kill()` API. You can also use 
 ### Command Options
 
 When constructing a `Command`, you can specify various options to provide additional configuration:
+
 ```C#
 Command.Run("foo.exe", new[] { "arg1" }, options => options.ThrowOnError()...);
 ```
@@ -74,6 +79,7 @@ The supported options are:
 
 ### Shells
 It is frequently the case that within the context of a single application all the `Command`s you invoke will want the same or very similar options. To simplify this, you can package up a set of options in a `Shell` object for convenient re-use:
+
 ```C#
 private static readonly Shell MyShell = new Shell(options => options.ThrowOnError().Timeout(...)...);
 
@@ -81,3 +87,9 @@ private static readonly Shell MyShell = new Shell(options => options.ThrowOnErro
 
 var command = MyShell.Run("foo.exe", new[] { "arg1", ... }, options => /* can still override/specify further options */);
 ```
+
+## Contributing
+
+PRs are welcome!
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/jessenich/scriptable)
