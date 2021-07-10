@@ -38,21 +38,24 @@ jobs:
         run: |
           dotnet restore \
             --nologo \
-            --configuration ${{ env.RELEASE_CONFIGURATION }}
+            --configuration ${{ env.RELEASE_CONFIGURATION }} \
+            ${{ env.PROJECT }}
           
           dotnet build \ 
             --nologo \ 
             --no-restore \
-            --configuration ${{ env.RELEASE_CONFIGURATION }}
+            --configuration ${{ env.RELEASE_CONFIGURATION }} \
+            ${{ env.PROJECT }}
 
-          dotnet test --list-tests
+          dotnet test --nologo --list-tests
           dotnet test \
-              --nologo
+              --nologo \
               --no-build \
               --verbosity detailed \
               --configuration ${{ env.RELEASE_CONFIGURATION }} \
               --logger "html;LogFileName=logs/scriptable-test-logfile.html" \
-              --results-directory results
+              --results-directory results \
+              ${{ env.TEST }}
           
           dotnet publish \
             --nologo \
@@ -60,7 +63,8 @@ jobs:
             --no-self-contained \
             --configuration ${{ env.RELEASE_ONFIGURATION }}
             --output publish/no-containment/ \
-            --verbosity detailed
+            --verbosity detailed \
+            ${{ env.PROJECT }}
 
           dotnet publish \
             --nologo \
@@ -69,7 +73,8 @@ jobs:
             --self-contained \
             --configuration ${{ env.RELEASE_ONFIGURATION }}
             --output publish/self-contained \
-            --verbository detailed
+            --verbository detailed \
+            ${{ env.PROJECT }}
           
           dotnet pack \ 
             --nologo \
@@ -79,7 +84,8 @@ jobs:
             --include-source \ 
             --output pack/full \
             --configuration ${{ env.RELEASE_CONFIGURATION }} \
-            --force
+            --force \
+            ${{ env.PROJECT }}
 
           dotnet pack \ 
             --nologo \
@@ -88,7 +94,8 @@ jobs:
             --include-symbols \
             --output pack/symbols-only
             --configuration ${{ env.RELEASE_CONFIGURATION }} \
-            --force
+            --force \
+            ${{ env.PROJECT }}
 
           dotnet pack \ 
             --nologo \
@@ -97,7 +104,8 @@ jobs:
             --include-source \
             --output pack/source-only \
             --configuration ${{ env.RELEASE_CONFIGURATION }} \
-            --force
+            --force \
+            ${{ env.PROJECT }}
 
           dotnet pack \ 
               --nologo \
@@ -105,11 +113,21 @@ jobs:
               --no-restore \
               --output pack/no-symbols-no-source
               --configuration ${{ env.RELEASE_CONFIGURATION }} \
-              --force
+              --force \
+              ${{ env.PROJECT }}
+      env:
+        - RELEASE_CONFIGURATION: Debug
+        - PROJECT: ./src/Scriptable/Scriptable.csproj
+        - TEST: ./tests/SCriptable.Test/Scriptable.Test.csproj
         
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: library
-          path: bin/**
+          path: |
+            bin/**
+            publish/**
+            pack/**
+            tests/logs/**
+            tests/results/**
           if-no-files-found: error
