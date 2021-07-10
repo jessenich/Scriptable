@@ -36,9 +36,7 @@ jobs:
 
       - name: Build, Test, Publish, Pack
         run: >
-          dotnet restore \
-            --configuration ${{ env.RELEASE_CONFIGURATION }} \
-            ${{ env.PROJECT }}
+          dotnet restore ${{ env.PROJECT }}
           
           dotnet build \ 
             --nologo \ 
