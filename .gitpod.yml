@@ -11,46 +11,92 @@ github:
     addBadge: true
     addLabel: prebuilt-in-gitpod
     
-  ports:
-      # Http Port    
-    - port: 5000
-      onOpen: notify
-      visibility: private
+ports:
+    # Http Port    
+  - port: 5000
+    onOpen: notify
+    visibility: private
+    
+    # Https Port
+  - port: 5001
+    onOpen: notify
+    visibility: private
+    
+    # gRPC Kestrel Port for MacOS Compatibility
+  - port: 5002
+    onOpen: notify
+    visibility: private
       
-      # Https Port
-    - port: 5001
-      onOpen: notify
-      visibilitt: private
-      
-      # gRPC Kestrel Port for MacOS Compatibility
-    - port: 5002
-      onOpen: notify
-      visibilitt: private
-      
-  tasks:
-    - name: Initialize Project  
-      before: dotnet restore ./Scriptable.sln --configuration "${RELEASE_CONFIGURATION}"
-      init: dotnet build ./Scriptable.sln --no-restore --nologo --configuration "${RELEASE_CONFIGURATION}"
-      command: |
-        dotnet test ./test/Scriptable.Test/Scriptable.Test.csproj \
-          --no-restore \
-          --nologo \
-          --configuration "${RELEASE_CONFIGURATION}" \
-          --logger "html;LogFileName=./test/logs/scriptable-test-logfile.html" \
-          --results-directory ./test/results
-      env:
-        RELEASE_CONFIGURATION: Debug
-      openMode: tab-after
-      
-  vscode:
-    extensions:
-      - ms-azuretools.vscode-azurefunctions
-      - ms-azuretools.vscode-docker
-      - CodeStream.codestream
-      - tintoy.msbuild-project-tools
-      - jsw.csharpextensions
-      - cschleiden.vscode-github-actions
-      - bierner.markdown-preview-github-styles
-        
+tasks:
+  - name: Initialize Project 
+     
+    before: |
+      TEMP_DIRECTORY="$(mktemp)"
 
-  workspaceLocation: "."
+      function FirstJsonValue {
+          perl -nle 'print $1 if m{"'"$1"'": "([^"]+)",?}' <<< "${@:2}"
+      }
+
+      if [ -x "$(command -v dotnet)" ] && dotnet --version &>/dev/null; then
+          export DOTNET_EXE="$(command -v dotnet)"
+      else
+          DOTNET_INSTALL_FILE="$TEMP_DIRECTORY/dotnet-install.sh"
+          mkdir -p "$TEMP_DIRECTORY"
+          curl -Lsfo "$DOTNET_INSTALL_FILE" "$DOTNET_INSTALL_URL"
+          chmod +x "$DOTNET_INSTALL_FILE"
+
+          # If global.json exists, load expected version
+          if [[ -f "$DOTNET_GLOBAL_FILE" ]]; then
+              DOTNET_VERSION=$(FirstJsonValue "version" "$(cat "$DOTNET_GLOBAL_FILE")")
+              if [[ "$DOTNET_VERSION" == ""  ]]; then
+                  unset DOTNET_VERSION
+              fi
+          fi
+
+          DOTNET_DIRECTORY="$TEMP_DIRECTORY/dotnet-unix"
+          if [[ -z ${DOTNET_VERSION+x} ]]; then
+              "$DOTNET_INSTALL_FILE" --install-dir "$DOTNET_DIRECTORY" \
+                --channel "$DOTNET_CHANNEL" \
+                --no-path
+          else
+              "$DOTNET_INSTALL_FILE" --install-dir "$DOTNET_DIRECTORY" \
+                --version "$DOTNET_VERSION" \
+                --no-path
+          fi
+          export DOTNET_EXE="$DOTNET_DIRECTORY/dotnet"
+      fi
+
+      echo "Microsoft (R) .NET Core SDK version $("$DOTNET_EXE" --version)"
+    init: dotnet restore ./Scriptable.sln --configuration "${RELEASE_CONFIGURATION}"
+    command: |
+      dotnet build ./Scriptable.sln \
+        --no-restore \
+        --nologo \
+        --configuration "${RELEASE_CONFIGURATION}";
+
+      dotnet test ./test/Scriptable.Test/Scriptable.Test.csproj \
+        --no-restore \
+        --no-build \
+        --nologo \
+        --configuration "${RELEASE_CONFIGURATION}" \
+        --logger "html;LogFileName=./test/logs/scriptable-test-logfile.html" \
+        --results-directory ./test/results
+    env:
+      RELEASE_CONFIGURATION: Debug
+    openMode: tab-after
+    
+vscode:
+  extensions:
+    # Azure Functions doesnt exist in Oen VSX yet. Load manually.
+    # - ms-azuretools.vscode-azurefunctions
+    - ms-azuretools.vscode-docker
+    - CodeStream.codestream
+    - tintoy.msbuild-project-tools
+    - jsw.csharpextensions
+    - cschleiden.vscode-github-actions
+    - bierner.markdown-preview-github-styles
+    - eamodio.gitlens
+    - editorconfig.editorconfig
+    - redhat.vscode-yaml
+      
+workspaceLocation: "."
