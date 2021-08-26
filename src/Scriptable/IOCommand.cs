@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Scriptable.Utilities;
 
 namespace Scriptable {
-    internal sealed class IOCommand : Command {
-        private readonly Command _command;
+    internal sealed class IOCommand : ShellCommand, IIOCommand {
+        private readonly ShellCommand _command;
 
         private readonly StandardIOStream _standardIOStream;
 
         // for toString
         private readonly object _sourceOrSink;
 
-        public IOCommand(Command command, Task ioTask, StandardIOStream standardIOStream, object sourceOrSink) {
+        public IOCommand(ShellCommand command, Task ioTask, StandardIOStream standardIOStream, object sourceOrSink) {
             this._command = command;
             this.Task = this.CreateTask(ioTask);
             this._standardIOStream = standardIOStream;
@@ -77,10 +74,10 @@ namespace Scriptable {
 
         private static string ToString(StandardIOStream standardIoStream) {
             return standardIoStream switch {
-                StandardIOStream.In    => "<",
-                StandardIOStream.Out   => ">",
+                StandardIOStream.In => "<",
+                StandardIOStream.Out => ">",
                 StandardIOStream.Error => "2>",
-                _                      => throw new InvalidOperationException("should never get here")
+                _ => throw new InvalidOperationException("should never get here")
             };
         }
     }

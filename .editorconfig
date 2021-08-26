@@ -8,12 +8,43 @@ indent_style = space
 indent_size = 4
 end_of_line = lf
 charset = utf-8
-trim_trailing_whitespace = false
-insert_final_newline = false
+trim_trailing_whitespace = true
+insert_final_newline = true
 
 [*.yml]
 indent_size = 2
 
+[*.json]
+indent_size = 2
+
+[*.{js,cjs,mjs,ts,tsx}]
+indent_size = 2
+
 [*.cs]
-trim_trailing_whitespace = true
-insert_final_newline = true
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+dotnet_style_require_accessibility_modifiers = never:warning
+
+csharp_style_expression_bodied_methods = true:silent
+csharp_style_expression_bodied_properties = true:warning
+csharp_style_expression_bodied_indexers = true:warning
+csharp_style_expression_bodied_accessors = true:warning
+insert_final_newline=true
+csharp_prefer_static_local_function=true:suggestion
+csharp_prefer_simple_using_statement=true:warning
+csharp_using_directive_placement=outside_namespace:warning
+csharp_style_var_for_built_in_types=true:silent
+csharp_style_var_when_type_is_apparent=true:silent
+csharp_style_var_elsewhere=true:silent
+
+[*.{cs,vb}]
+dotnet_style_parentheses_in_other_operators=never_if_unnecessary:warning
+dotnet_diagnostic.CA2250.severity=warning
+dotnet_diagnostic.CA2252.severity=warning
+dotnet_diagnostic.CA1816.severity=warning
+dotnet_style_qualification_for_field=false:silent
+dotnet_style_qualification_for_property=false:silent
+dotnet_style_qualification_for_method=false:silent
+dotnet_style_qualification_for_event=false:silent

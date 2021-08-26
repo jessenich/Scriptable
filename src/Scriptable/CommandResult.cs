@@ -2,12 +2,12 @@
 
 namespace Scriptable {
     /// <summary>
-    /// The result of a <see cref="Command"/>
+    /// The result of a <see cref="ShellCommand"/>
     /// </summary>
     public sealed class CommandResult {
         private readonly Lazy<string> _standardOutput, _standardError;
 
-        internal CommandResult(int exitCode, Command command)
+        internal CommandResult(int exitCode, ShellCommand command)
             : this(exitCode, () => command.StandardOutput.ReadToEnd(), () => command.StandardError.ReadToEnd()) { }
 
         internal CommandResult(int exitCode, Func<string> standardOutput, Func<string> standardError) {

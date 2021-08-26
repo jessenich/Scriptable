@@ -82,14 +82,5 @@ It is frequently the case that within the context of a single application all th
 
 ```C#
 private static readonly Shell MyShell = new Shell(options => options.ThrowOnError().Timeout(...)...);
-
-...
-
 var command = MyShell.Run("foo.exe", new[] { "arg1", ... }, options => /* can still override/specify further options */);
 ```
-
-## Contributing
-
-PRs are welcome!
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/jessenich/scriptable)

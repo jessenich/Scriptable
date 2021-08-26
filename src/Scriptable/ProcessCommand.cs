@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+
 using Scriptable.Streams;
-using SystemTask = System.Threading.Tasks.Task;
 using Scriptable.Utilities;
 
+using SystemTask = System.Threading.Tasks.Task;
+
 namespace Scriptable {
-    internal sealed class ProcessCommand : Command {
+    internal sealed class ProcessCommand : ShellCommand, IProcessCommand {
         private readonly bool _disposeOnExit;
 
         /// <summary>
@@ -30,7 +27,7 @@ namespace Scriptable {
             this._disposeOnExit = disposeOnExit;
             this._fileName = startInfo.FileName;
             this._arguments = startInfo.Arguments;
-            this._process = new Process {StartInfo = startInfo, EnableRaisingEvents = true};
+            this._process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
 
             var processMonitoringTask = CreateProcessMonitoringTask(this._process);
 
@@ -106,7 +103,7 @@ namespace Scriptable {
         }
 
         private IReadOnlyList<Process>? _processes;
-        public override IReadOnlyList<Process> Processes => this._processes ??= new ReadOnlyCollection<Process>(new[] {this.Process});
+        public override IReadOnlyList<Process> Processes => this._processes ??= new ReadOnlyCollection<Process>(new[] { this.Process });
 
         private readonly object _processIdOrExceptionDispatchInfo;
 
@@ -114,14 +111,15 @@ namespace Scriptable {
             get {
                 this.ThrowIfDisposed();
 
-                if (this._processIdOrExceptionDispatchInfo is ExceptionDispatchInfo exceptionDispatchInfo) exceptionDispatchInfo.Throw();
+                if (this._processIdOrExceptionDispatchInfo is ExceptionDispatchInfo exceptionDispatchInfo)
+                    exceptionDispatchInfo.Throw();
 
-                return (int) this._processIdOrExceptionDispatchInfo;
+                return (int)this._processIdOrExceptionDispatchInfo;
             }
         }
 
         private IReadOnlyList<int>? _processIds;
-        public override IReadOnlyList<int> ProcessIds => this._processIds ??= new ReadOnlyCollection<int>(new[] {this.ProcessId});
+        public override IReadOnlyList<int> ProcessIds => this._processIds ??= new ReadOnlyCollection<int>(new[] { this.ProcessId });
 
         private readonly ProcessStreamWriter? _standardInput;
         public override ProcessStreamWriter StandardInput => this._standardInput ?? throw new InvalidOperationException("Standard input is not redirected");

@@ -8,7 +8,7 @@ using Scriptable.Streams;
 using Scriptable.Utilities;
 
 namespace Scriptable {
-    internal sealed class AttachedCommand : Command {
+    internal sealed class AttachedCommand : ShellCommand {
         private const string StreamPropertyExceptionMessage =
             "This property cannot be used when attaching to already running process.";
 

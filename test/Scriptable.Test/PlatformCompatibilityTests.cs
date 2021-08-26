@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+
 using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Scriptable;
-using Scriptable.Utilities;
+
 using Scriptable.Signals;
 
-namespace Scriptable.Test
-{
+namespace Scriptable.Test {
     internal static class Signaler {
         // implementation based on https://stackoverflow.com/questions/813086/can-i-send-a-ctrl-c-sigint-to-an-application-on-windows
         // + some additional research / experimentation
@@ -23,34 +16,32 @@ namespace Scriptable.Test
             NativeMethods.FreeConsole();
 
             // attach to the child's console
-            return NativeMethods.AttachConsole(checked((uint) processId))
-                   // disable signal handling for our program
-                   // from https://docs.microsoft.com/en-us/windows/console/setconsolectrlhandler:
-                   // "Calling SetConsoleCtrlHandler with the NULL and TRUE arguments causes the calling process to ignore CTRL+C signals"
+            return NativeMethods.AttachConsole(checked((uint)processId))
+                // disable signal handling for our program
+                // from https://docs.microsoft.com/en-us/windows/console/setconsolectrlhandler:
+                // "Calling SetConsoleCtrlHandler with the NULL and TRUE arguments causes the calling process to ignore CTRL+C signals"
                 && NativeMethods.SetConsoleCtrlHandler(null, true)
-                   // send the signal
+                // send the signal
                 && NativeMethods.GenerateConsoleCtrlEvent(ctrlType, NativeMethods.AllProcessesWithCurrentConsoleGroup)
                 ? 0
                 : Marshal.GetLastWin32Error();
         }
     }
 
-    public static class PlatformCompatibilityTests
-    {
+    public static class PlatformCompatibilityTests {
         public static readonly string DotNetPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? @"C:\Program Files\dotnet\dotnet.exe"
             : "/usr/bin/dotnet";
 
         public static readonly string SampleCommandPath = GetSampleCommandPath();
 
-        private static string GetSampleCommandPath()
-        {
+        private static string GetSampleCommandPath() {
             var assemblyLocation = typeof(Program).Assembly.Location;
 #if !NETCOREAPP2_2
             return assemblyLocation;
 #else
             // needed on .NET Core to make sure the right config files are alongside SampleCommand.dll
-            return assemblyLocation.Replace("MedallionShell.Tests", "SampleCommand");
+            return assemblyLocation.Replace("Scriptable.Tests", "SampleCommand");
 #endif
         }
 
@@ -69,16 +60,14 @@ namespace Scriptable.Test
             Shell.Default;
 #endif
 
-        public static void TestWriteAfterExit()
-        {
+        public static void TestWriteAfterExit() {
             var command = TestShell.Run(SampleCommandPath, "exit", 1);
             command.Wait();
             command.StandardInput.WriteLine(); // no-op
             command.StandardInput.BaseStream.WriteAsync(new byte[1], 0, 1).Wait(); // no-op
         }
 
-        public static void TestFlushAfterExit()
-        {
+        public static void TestFlushAfterExit() {
             var command = TestShell.Run(SampleCommandPath, "exit", 1);
             command.Wait();
             command.StandardInput.Flush();
@@ -86,17 +75,14 @@ namespace Scriptable.Test
             command.StandardInput.BaseStream.FlushAsync().Wait();
         }
 
-        public static void TestReadAfterExit()
-        {
+        public static void TestReadAfterExit() {
             var command = TestShell.Run(SampleCommandPath, "exit", 1);
             command.Wait();
             string line;
-            if ((line = command.StandardOutput.ReadLine()) != null)
-            {
+            if ((line = command.StandardOutput?.ReadLine() ?? string.Empty) != null) {
                 throw new InvalidOperationException($"StdOut was '{line}'");
             }
-            if ((line = command.StandardError.ReadLine()) != null)
-            {
+            if ((line = command.StandardError.ReadLine() ?? string.Empty) != null) {
                 throw new InvalidOperationException($"StdErr was '{line}'");
             }
         }
@@ -104,8 +90,7 @@ namespace Scriptable.Test
         /// <summary>
         /// See SafeGetExitCode comment
         /// </summary>
-        public static void TestExitWithMinusOne()
-        {
+        public static void TestExitWithMinusOne() {
             var command = TestShell.Run(SampleCommandPath, "exit", -1);
             var exitCode = command.Result.ExitCode;
             // Linux only returns the lower 8 bits of the exit code. Sounds like this may change in the future so we'll be robust to either
@@ -122,47 +107,39 @@ namespace Scriptable.Test
         /// <summary>
         /// See PlatformCompatibilityHelper.SafeStart comment
         /// </summary>
-        public static void TestExitWithOne()
-        {
+        public static void TestExitWithOne() {
             var command = TestShell.Run(SampleCommandPath, "exit", 1);
             if (command.Result.ExitCode != 1) { throw new InvalidOperationException($"Was: {command.Result.ExitCode}"); }
         }
 
-        public static void TestBadProcessFile()
-        {
-            var baseDirectory = Path.GetDirectoryName(SampleCommandPath);
+        public static void TestBadProcessFile() {
+            var baseDirectory = Path.GetDirectoryName(SampleCommandPath) ?? throw new IOException($"Unable to obtain directory name of path: {SampleCommandPath}");
 
-            AssertThrows<Win32Exception>(() => Command.Run(baseDirectory));
-            AssertThrows<Win32Exception>(() => Command.Run(Path.Combine(baseDirectory, "DOES_NOT_EXIST.exe")));
+            AssertThrows<Win32Exception>(() => ShellCommand.Run(baseDirectory));
+            AssertThrows<Win32Exception>(() => ShellCommand.Run(Path.Combine(baseDirectory, "DOES_NOT_EXIST.exe")));
         }
 
-        public static void TestAttaching()
-        {
+        public static void TestAttaching() {
             var processCommand = TestShell.Run(SampleCommandPath, new[] { "sleep", "10000" });
-            try
-            {
+            try {
                 var processId = processCommand.ProcessId;
-                if (!Command.TryAttachToProcess(processId, out _))
-                {
+                if (!ShellCommand.TryAttachToProcess(processId, out _)) {
                     throw new InvalidOperationException("Wasn't able to attach to the running process.");
                 }
             }
-            finally
-            {
+            finally {
                 processCommand.Kill();
             }
         }
 
-        public static void TestWriteToStandardInput()
-        {
+        public static void TestWriteToStandardInput() {
             var command = TestShell.Run(SampleCommandPath, new[] { "echo" }, options: o => o.Timeout(TimeSpan.FromSeconds(5)));
             command.StandardInput.WriteLine("abcd");
             command.StandardInput.Dispose();
             if (command.Result.StandardOutput != ("abcd" + Environment.NewLine)) { throw new InvalidOperationException($"Was '{command.Result.StandardOutput}'"); }
         }
 
-        public static void TestArgumentsRoundTrip()
-        {
+        public static void TestArgumentsRoundTrip() {
             var arguments = new[]
             {
                 @"c:\temp",
@@ -175,24 +152,20 @@ namespace Scriptable.Test
             var command = TestShell.Run(SampleCommandPath, new[] { "argecho" }.Concat(arguments), o => o.ThrowOnError());
             var outputLines = command.StandardOutput.GetLines().ToArray();
             command.Wait();
-            if (!outputLines.SequenceEqual(arguments))
-            {
+            if (!outputLines.SequenceEqual(arguments)) {
                 throw new InvalidOperationException($"Was {string.Join(" ", outputLines.Select((l, index) => $"'{l}' ({(index >= arguments.Length ? "EXTRA" : (l == arguments[index]).ToString())})"))}");
             }
         }
 
-        public static void TestKill()
-        {
+        public static void TestKill() {
             var command = TestShell.Run(SampleCommandPath, "sleep", "10000");
             command.Kill();
             if (!command.Task.Wait(1000)) { throw new InvalidOperationException("Should have exited after kill"); }
         }
 
-        private static void AssertThrows<TException>(Action action) where TException : Exception
-        {
+        private static void AssertThrows<TException>(Action action) where TException : Exception {
             try { action(); }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 if (ex.GetType() != typeof(TException)) { throw new InvalidOperationException($"Expected {typeof(TException)} but got {ex.GetType()}"); }
                 return;
             }

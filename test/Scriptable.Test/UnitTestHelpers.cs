@@ -9,7 +9,7 @@ namespace Scriptable.Test
         public static Shell TestShell => PlatformCompatibilityTests.TestShell;
         public static string DotNetPath => PlatformCompatibilityTests.DotNetPath;
 
-        public static Shell MakeTestShell(Action<Shell.Options> options) => new Shell(TestShell.Configuration + options);
+        public static Shell MakeTestShell(Action<Shell.ShellOptions> options) => new Shell(TestShell.Configuration + options);
 
         public static T ShouldEqual<T>(this T @this, T that, string? message = null)
         {

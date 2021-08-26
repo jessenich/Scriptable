@@ -1,7 +1,5 @@
-﻿using System.Diagnostics;
-using System.IO;
+using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Scriptable.Streams {
     internal sealed class InternalProcessStreamReader : ProcessStreamReader {
@@ -34,13 +32,13 @@ namespace Scriptable.Streams {
                     await this._pipe.InputStream.WriteAsync(buffer, 0, bytesRead).ConfigureAwait(false);
             }
             finally {
-                #if NETSTANDARD1_3
+#if NETSTANDARD1_3
                 this.processStream.Dispose();
                 this.pipe.InputStream.Dispose();
-                #else
+#else
                 this._processStream.Close();
                 this._pipe.InputStream.Close();
-                #endif
+#endif
             }
         }
 
@@ -99,9 +97,7 @@ namespace Scriptable.Streams {
             return this._reader.ReadLine();
         }
 
-        public override Task<string> ReadLineAsync() {
-            return this._reader.ReadLineAsync();
-        }
+        public override Task<string> ReadLineAsync() => this._reader.ReadLineAsync() ?? Task.FromResult(string.Empty);
 
         public override string ReadToEnd() {
             return this._reader.ReadToEnd();
@@ -112,7 +108,8 @@ namespace Scriptable.Streams {
         }
 
         protected override void Dispose(bool disposing) {
-            if (disposing) this.Discard();
+            if (disposing)
+                this.Discard();
         }
 
         #endregion

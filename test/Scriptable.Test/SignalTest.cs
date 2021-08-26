@@ -79,7 +79,7 @@ namespace Scriptable.Test
                 Assert.Pass("Tests windows-specific behavior");
             }
 
-            Command.TryAttachToProcess(ProcessHelper.CurrentProcessId, out var thisCommand).ShouldEqual(true);
+            ShellCommand.TryAttachToProcess(ProcessHelper.CurrentProcessId, out var thisCommand).ShouldEqual(true);
 
             using (var manualResetEvent = new ManualResetEventSlim(initialState: false))
             {

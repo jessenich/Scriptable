@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+
 using Scriptable.Streams;
 using Scriptable.Utilities;
 
 namespace Scriptable {
-    internal sealed class PipedCommand : Command {
-        private readonly Command _first, _second;
+    internal sealed class PipedCommand : ShellCommand, IPipedCommand {
+        private readonly ShellCommand _first, _second;
         private readonly Task<CommandResult> _task;
 
-        internal PipedCommand(Command first, Command second) {
+        internal PipedCommand(ShellCommand first, ShellCommand second) {
             this._first = first;
             this._second = second;
 

@@ -1,16 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+
 using NUnit.Framework;
 
-namespace Scriptable.Test
-{
-    using static UnitTestHelpers;
+using static Scriptable.Test.UnitTestHelpers;
 
-    public class IOCommandTest
-    {
+namespace Scriptable.Test {
+    public class IOCommandTest {
         [Test]
-        public void TestStandardOutCannotBeAccessedAfterRedirectingIt()
-        {
+        public void TestStandardOutCannotBeAccessedAfterRedirectingIt() {
             var output = new List<string>();
             var command = TestShell.Run(SampleCommand, "argecho", "a");
             var ioCommand = command.RedirectTo(output);
@@ -30,10 +28,10 @@ namespace Scriptable.Test
         }
 
         [Test]
-        public void TestStandardErrorCannotBeAccessedAfterRedirectingIt()
-        {
+        public void TestStandardErrorCannotBeAccessedAfterRedirectingIt() {
             var output = new List<string>();
-            var command = TestShell.Run(SampleCommand, "argecho", "a");
+            const string invalidCmd = "argecho";
+            var command = TestShell.Run(SampleCommand, invalidCmd, "a");
             var ioCommand = command.RedirectStandardErrorTo(output);
 
             var errorMessage = Assert.Throws<InvalidOperationException>(() => ioCommand.StandardError.GetHashCode()).Message;
@@ -51,8 +49,7 @@ namespace Scriptable.Test
         }
 
         [Test]
-        public void TestStandardInputCannotBeAccessedAfterRedirectingIt()
-        {
+        public void TestStandardInputCannotBeAccessedAfterRedirectingIt() {
             var command = TestShell.Run(SampleCommand, "echo");
             var ioCommand = command.RedirectFrom(new[] { "a" });
 

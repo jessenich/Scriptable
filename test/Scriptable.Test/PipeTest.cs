@@ -1,46 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
 using NUnit.Framework;
+
 using Scriptable.Utilities;
 
-namespace Scriptable.Test
-{
-    using static UnitTestHelpers;
+using static Scriptable.Test.UnitTestHelpers;
 
-    public class PipeTest : IDisposable
-    {
+namespace Scriptable.Test {
+
+
+    public class PipeTest : IDisposable {
         [Test]
-        public void TestPiping()
-        {
+        public void TestPiping() {
             var shell = new Shell(TestShell.Configuration + (o => o.ThrowOnError()));
 
             var kinds = Enum.GetValues(typeof(Kind)).Cast<Kind>();
-            foreach (var inKind in kinds)
-            {
-                foreach (var outKind in kinds.Where(k => k != Kind.String))
-                {
+            foreach (var inKind in kinds) {
+                foreach (var outKind in kinds.Where(k => k != Kind.String)) {
                     dynamic input = this.CreateSinkOrSource(inKind, isOut: false);
                     dynamic output = this.CreateSinkOrSource(outKind, isOut: true);
                     var command = shell.Run(SampleCommand, "echo");
                     var tasks = new List<Task>();
-                    if (input is TextReader)
-                    {
+                    if (input is TextReader) {
                         tasks.Add(command.StandardInput.PipeFromAsync((TextReader)input));
                     }
-                    else
-                    {
+                    else {
                         command = command < input;
                     }
-                    if (output is TextWriter)
-                    {
+                    if (output is TextWriter) {
                         tasks.Add(command.StandardOutput.PipeToAsync((TextWriter)output));
                     }
-                    else
-                    {
+                    else {
                         command = command > output;
                     }
                     tasks.Add(command.Task);
@@ -55,8 +45,7 @@ namespace Scriptable.Test
 
         private static readonly string Content = string.Join(Environment.NewLine, Enumerable.Range(1, 100).Select(i => string.Join(string.Empty, Enumerable.Repeat(i.As<object>(), i))));
 
-        public enum Kind
-        {
+        public enum Kind {
             Stream,
             File,
             ReaderWriter,
@@ -65,16 +54,13 @@ namespace Scriptable.Test
             Lines,
         }
 
-        private object CreateSinkOrSource(Kind kind, bool isOut)
-        {
-            switch (kind)
-            {
+        private object CreateSinkOrSource(Kind kind, bool isOut) {
+            switch (kind) {
                 case Kind.Stream:
                     return isOut ? new MemoryStream() : new MemoryStream(Encoding.UTF8.GetBytes(Content));
                 case Kind.File:
                     var path = GetPath(isOut);
-                    if (!isOut)
-                    {
+                    if (!isOut) {
                         File.WriteAllText(path, Content);
                     }
                     return new FileInfo(path);
@@ -91,10 +77,8 @@ namespace Scriptable.Test
             }
         }
 
-        private string Read(Kind kind, object output)
-        {
-            switch (kind)
-            {
+        private string Read(Kind kind, object output) {
+            switch (kind) {
                 case Kind.Stream:
                     return Encoding.UTF8.GetString(((MemoryStream)output).ToArray());
                 case Kind.File:
@@ -110,25 +94,20 @@ namespace Scriptable.Test
             }
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             TearDown();
         }
 
-        public static void TearDown()
-        {
-            foreach (var isOut in new[] { false, true })
-            {
+        public static void TearDown() {
+            foreach (var isOut in new[] { false, true }) {
                 var path = GetPath(isOut);
-                if (File.Exists(path))
-                {
+                if (File.Exists(path)) {
                     File.Delete(path);
                 }
             }
         }
 
-        private static string GetPath(bool isOut)
-        {
+        private static string GetPath(bool isOut) {
             return Path.Combine(Path.GetTempPath(), "PipeTestFile_" + (isOut ? "IN" : "OUT") + ".txt");
         }
     }

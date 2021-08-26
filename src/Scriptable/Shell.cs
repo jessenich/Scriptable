@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+
 using Scriptable.Utilities;
 
 namespace Scriptable {
     /// <summary>
-    /// Represents an object which can be used to dispatch <see cref="Command"/>s
+    /// Represents an object which can be used to dispatch <see cref="ShellCommand"/>s
     /// </summary>
-    public sealed class Shell {
-        internal Action<Options> Configuration { get; }
+    public sealed class Shell : IShell {
+        internal Action<ShellOptions> Configuration { get; }
 
         /// <summary>
         /// Creates a shell whose commands will receive the given configuration options
         /// </summary>
-        public Shell(Action<Options> options) {
+        public Shell(Action<ShellOptions> options) {
             Throw.IfNull(options, nameof(options));
             this.Configuration = options;
         }
@@ -30,14 +26,14 @@ namespace Scriptable {
         /// Executes the given <paramref name="executable"/> with the given <paramref name="arguments"/> and
         /// <paramref name="options"/>
         /// </summary>
-        public Command Run(string executable, IEnumerable<object>? arguments = null, Action<Options>? options = null) {
+        public ShellCommand Run(string executable, IEnumerable<object>? arguments = null, Action<ShellOptions>? options = null) {
             Throw.If(string.IsNullOrEmpty(executable), "executable is required");
 
             var finalOptions = this.GetOptions(options);
 
             var processStartInfo = new ProcessStartInfo {
                 Arguments = arguments != null
-                    ? finalOptions.CommandLineSyntax.CreateArgumentString(arguments.Select(arg => Convert.ToString(arg, CultureInfo.InvariantCulture)))
+                    ? finalOptions.CommandLineSyntax.CreateArgumentString(arguments!.Select(arg => Convert.ToString(arg, CultureInfo.InvariantCulture))!)
                     : string.Empty,
                 CreateNoWindow = true,
                 FileName = executable,
@@ -46,10 +42,12 @@ namespace Scriptable {
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
-            if (finalOptions.ProcessStreamEncoding != null) processStartInfo.StandardOutputEncoding = processStartInfo.StandardErrorEncoding = finalOptions.ProcessStreamEncoding;
-            finalOptions.StartInfoInitializers.ForEach(a => a(processStartInfo));
 
-            Command command = new ProcessCommand(
+            if (finalOptions.ProcessStreamEncoding != null)
+                processStartInfo.StandardOutputEncoding = processStartInfo.StandardErrorEncoding = finalOptions.ProcessStreamEncoding;
+
+            finalOptions.StartInfoInitializers.ForEach(a => a(processStartInfo));
+            ShellCommand command = new ProcessCommand(
                 processStartInfo,
                 finalOptions.ThrowExceptionOnError,
                 finalOptions.DisposeProcessOnExit,
@@ -59,7 +57,8 @@ namespace Scriptable {
             );
             foreach (var initializer in finalOptions.CommandInitializers) {
                 command = initializer(command);
-                if (command == null) throw new InvalidOperationException($"{nameof(Command)} initializer passed to {nameof(Options)}.{nameof(Options.Command)} must not return null!");
+                if (command == null)
+                    throw new InvalidOperationException($"{nameof(ShellCommand)} initializer passed to {nameof(ShellOptions)}.{nameof(ShellOptions.Command)} must not return null!");
             }
 
             return command;
@@ -70,7 +69,7 @@ namespace Scriptable {
         /// giving <paramref name="attachedCommand" /> representing the process and returning
         /// true if this succeeded, otherwise false.
         /// </summary>
-        public bool TryAttachToProcess(int processId, [NotNullWhen(true)] out Command? attachedCommand) {
+        public bool TryAttachToProcess(int processId, [NotNullWhen(true)] out ShellCommand? attachedCommand) {
             return this.TryAttachToProcess(processId, null, out attachedCommand);
         }
 
@@ -79,7 +78,7 @@ namespace Scriptable {
         /// and <paramref name="options"/>,  giving <paramref name="attachedCommand" /> representing
         /// the process and returning true if this succeeded, otherwise false.
         /// </summary>
-        public bool TryAttachToProcess(int processId, Action<Options>? options, [NotNullWhen(true)] out Command? attachedCommand) {
+        public bool TryAttachToProcess(int processId, Action<ShellOptions>? options, [NotNullWhen(true)] out ShellCommand? attachedCommand) {
             var finalOptions = this.GetOptions(options);
             if (finalOptions.ProcessStreamEncoding != null || finalOptions.StartInfoInitializers.Count != 0)
                 throw new InvalidOperationException(
@@ -93,11 +92,8 @@ namespace Scriptable {
                 // Since simply getting (Safe)Handle from the process enables us to read
                 // the exit code later, and handle itself is disposed when the whole class
                 // is disposed, we do not need its value. Hence the bogus call to GetType().
-                #if NET45
                 process.Handle.GetType();
-                #else
                 process.SafeHandle.GetType();
-                #endif
             }
             catch (Exception e) when (IsIgnorableAttachingException(e)) {
                 process?.Dispose();
@@ -121,7 +117,7 @@ namespace Scriptable {
         /// <summary>
         /// Executes the given <paramref name="executable"/> with the given <paramref name="arguments"/>
         /// </summary>
-        public Command Run(string executable, params object[] arguments) {
+        public ShellCommand Run(string executable, params object[] arguments) {
             Throw.IfNull(arguments, "arguments");
 
             return this.Run(executable, arguments.AsEnumerable());
@@ -134,24 +130,24 @@ namespace Scriptable {
         /// </summary>
         public static Shell Default { get; } = new(_ => { });
 
-        private Options GetOptions(Action<Options>? additionalConfiguration) {
-            var builder = new Options();
+        private ShellOptions GetOptions(Action<ShellOptions>? additionalConfiguration) {
+            var builder = new ShellOptions();
             this.Configuration.Invoke(builder);
             additionalConfiguration?.Invoke(builder);
             return builder;
         }
 
-        /// <summary>
-        /// Provides a builder interface for configuring the options for creating and executing
-        /// a <see cref="Scriptable.Command"/>
-        /// </summary>
-        public sealed class Options {
-            internal Options() {
+        // process has already exited or ID is invalid or
+        // process exited after its creation but before taking its handle
+        private static bool IsIgnorableAttachingException(Exception exception) => exception is ArgumentException or InvalidOperationException;
+
+        public sealed class ShellOptions {
+            internal ShellOptions() {
                 this.RestoreDefaults();
             }
 
             internal List<Action<ProcessStartInfo>> StartInfoInitializers { get; private set; } = default!; // assigned in RestoreDefaults
-            internal List<Func<Command, Command>> CommandInitializers { get; private set; } = default!;     // assigned in RestoreDefaults
+            internal List<Func<ShellCommand, ShellCommand>> CommandInitializers { get; private set; } = default!;     // assigned in RestoreDefaults
             internal CommandLineSyntax CommandLineSyntax { get; private set; } = default!;                  // assigned in RestoreDefaults
             internal bool ThrowExceptionOnError { get; private set; }
             internal bool DisposeProcessOnExit { get; private set; }
@@ -162,9 +158,9 @@ namespace Scriptable {
             /// <summary>
             /// Restores all settings to the default value
             /// </summary>
-            public Options RestoreDefaults() {
+            public ShellOptions RestoreDefaults() {
                 this.StartInfoInitializers = new List<Action<ProcessStartInfo>>();
-                this.CommandInitializers = new List<Func<Command, Command>>();
+                this.CommandInitializers = new List<Func<ShellCommand, ShellCommand>>();
                 this.CommandLineSyntax = PlatformCompatibilityHelper.GetDefaultCommandLineSyntax();
                 this.ThrowExceptionOnError = false;
                 this.DisposeProcessOnExit = true;
@@ -178,7 +174,7 @@ namespace Scriptable {
             /// Specifies a function which can modify the <see cref="ProcessStartInfo"/>. Multiple such functions
             /// can be specified this way
             /// </summary>
-            public Options StartInfo(Action<ProcessStartInfo> initializer) {
+            public ShellOptions StartInfo(Action<ProcessStartInfo> initializer) {
                 Throw.IfNull(initializer, nameof(initializer));
 
                 this.StartInfoInitializers.Add(initializer);
@@ -186,12 +182,11 @@ namespace Scriptable {
             }
 
             /// <summary>
-            /// Specifies a function which can modify the <see cref="Scriptable.Command"/>. Multiple such functions
+            /// Specifies a function which can modify the <see cref="Scriptable.ShellCommand"/>. Multiple such functions
             /// can be specified this way
             /// </summary>
-            public Options Command(Action<Command> initializer) {
+            public ShellOptions Command(Action<ShellCommand> initializer) {
                 Throw.IfNull(initializer, nameof(initializer));
-
                 this.Command(c => {
                     initializer(c);
                     return c;
@@ -200,63 +195,60 @@ namespace Scriptable {
             }
 
             /// <summary>
-            /// Specifies a function which can project the <see cref="Scriptable.Command"/> to a new <see cref="Scriptable.Command"/>.
-            /// Intended to be used with <see cref="Scriptable.Command"/>-producing "pipe" functions like <see cref="Scriptable.Command.RedirectTo(System.Collections.Generic.ICollection{char})"/>
+            /// Specifies a function which can project the <see cref="Scriptable.ShellCommand"/> to a new <see cref="Scriptable.ShellCommand"/>.
+            /// Intended to be used with <see cref="Scriptable.ShellCommand"/>-producing "pipe" functions like <see cref="Scriptable.ShellCommand.RedirectTo(System.Collections.Generic.ICollection{char})"/>
             /// </summary>
-            public Options Command(Func<Command, Command> initializer) {
+            public ShellOptions Command(Func<ShellCommand, ShellCommand> initializer) {
                 Throw.IfNull(initializer, nameof(initializer));
-
                 this.CommandInitializers.Add(initializer);
                 return this;
             }
 
             /// <summary>
-            /// Sets the initial working directory of the <see cref="Scriptable.Command"/> (defaults to the current working directory)
+            /// Sets the initial working directory of the <see cref="Scriptable.ShellCommand"/> (defaults to the current working directory)
             /// </summary>.
-            public Options WorkingDirectory(string path) {
+            public ShellOptions WorkingDirectory(string path) {
                 return this.StartInfo(psi => psi.WorkingDirectory = path);
             }
 
-            #if !NETSTANDARD1_3
             /// <summary>
-            /// Adds or overwrites an environment variable to be passed to the <see cref="Scriptable.Command"/>
+            /// Adds or overwrites an environment variable to be passed to the <see cref="Scriptable.ShellCommand"/>
             /// </summary>
-            public Options EnvironmentVariable(string name, string value) {
+            public ShellOptions EnvironmentVariable(string name, string value) {
                 Throw.If(string.IsNullOrEmpty(name), "name is required");
 
                 return this.StartInfo(psi => psi.EnvironmentVariables[name] = value);
             }
 
             /// <summary>
-            /// Adds or overwrites a set of environmental variables to be passed to the <see cref="Scriptable.Command"/>
+            /// Adds or overwrites a set of environmental variables to be passed to the <see cref="Scriptable.ShellCommand"/>
             /// </summary>
-            public Options EnvironmentVariables(IEnumerable<KeyValuePair<string, string>> environmentVariables) {
+            public ShellOptions EnvironmentVariables(IEnumerable<KeyValuePair<string, string>> environmentVariables) {
                 Throw.IfNull(environmentVariables, "environmentVariables");
 
                 var environmentVariablesList = environmentVariables.ToList();
                 return this.StartInfo(psi => environmentVariablesList.ForEach(kvp => psi.EnvironmentVariables[kvp.Key] = kvp.Value));
             }
-            #endif
 
             /// <summary>
-            /// If specified, a non-zero exit code will cause the <see cref="Scriptable.Command"/>'s <see cref="Task"/> to fail
+            /// If specified, a non-zero exit code will cause the <see cref="Scriptable.ShellCommand"/>'s <see cref="Task"/> to fail
             /// with <see cref="ErrorExitCodeException"/>. Defaults to false
             /// </summary>
-            public Options ThrowOnError(bool value = true) {
+            public ShellOptions ThrowOnError(bool value = true) {
                 this.ThrowExceptionOnError = value;
                 return this;
             }
 
             /// <summary>
             /// If specified, the underlying <see cref="Process"/> object for the command will be disposed when the process exits.
-            /// This means that there is no need to dispose of a <see cref="Scriptable.Command"/>.
+            /// This means that there is no need to dispose of a <see cref="Scriptable.ShellCommand"/>.
             ///
-            /// This also means that <see cref="Scriptable.Command.Process"/> cannot be reliably accessed,
+            /// This also means that <see cref="Scriptable.ShellCommand.Process"/> cannot be reliably accessed,
             /// since it may exit at any time.
             ///
             /// Defaults to true
             /// </summary>
-            public Options DisposeOnExit(bool value = true) {
+            public ShellOptions DisposeOnExit(bool value = true) {
                 this.DisposeProcessOnExit = value;
                 return this;
             }
@@ -266,7 +258,7 @@ namespace Scriptable {
             /// an appropriate value for the current platform
             /// </summary>
             [Obsolete("The default should work across platforms")]
-            public Options Syntax(CommandLineSyntax syntax) {
+            public ShellOptions Syntax(CommandLineSyntax syntax) {
                 Throw.IfNull(syntax, "syntax");
 
                 this.CommandLineSyntax = syntax;
@@ -276,7 +268,7 @@ namespace Scriptable {
             /// <summary>
             /// Specifies a timeout after which the process should be killed. Defaults to <see cref="System.Threading.Timeout.InfiniteTimeSpan"/>
             /// </summary>
-            public Options Timeout(TimeSpan timeout) {
+            public ShellOptions Timeout(TimeSpan timeout) {
                 Throw<ArgumentOutOfRangeException>.If(timeout < TimeSpan.Zero && timeout != System.Threading.Timeout.InfiniteTimeSpan, "timeout");
 
                 this.ProcessTimeout = timeout;
@@ -293,7 +285,7 @@ namespace Scriptable {
             /// for different streams, use this method to set the StandardInput encoding and then use <see cref="StartInfo(Action{ProcessStartInfo})"/>
             /// to further override the two output encodings
             /// </summary>
-            public Options Encoding(Encoding encoding) {
+            public ShellOptions Encoding(Encoding encoding) {
                 Throw.IfNull(encoding, nameof(encoding));
 
                 this.ProcessStreamEncoding = encoding;
@@ -302,17 +294,12 @@ namespace Scriptable {
 
             /// <summary>
             /// Specifies a <see cref="System.Threading.CancellationToken"/> which will abort the command when canceled.
-            /// When a command is aborted, the underlying process will be killed as if using <see cref="Scriptable.Command.Kill"/>
+            /// When a command is aborted, the underlying process will be killed as if using <see cref="Scriptable.ShellCommand.Kill"/>
             /// </summary>
-            public Options CancellationToken(CancellationToken cancellationToken) {
+            public ShellOptions CancellationToken(CancellationToken cancellationToken) {
                 this.ProcessCancellationToken = cancellationToken;
                 return this;
             }
-        }
-
-        private static bool IsIgnorableAttachingException(Exception exception) {
-            return exception is ArgumentException          // process has already exited or ID is invalid
-                || exception is InvalidOperationException; // process exited after its creation but before taking its handle
         }
     }
 }

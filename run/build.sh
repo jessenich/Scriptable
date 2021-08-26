@@ -3,16 +3,17 @@
 bash --version 2>&1 | head -n 1
 
 set -eo pipefail
-SCRIPT_DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)
+SCRIPT_DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
+SCRIPT_DIR="${SCRIPT_DIR}/.."
 
 ###########################################################################
 # CONFIGURATION
 ###########################################################################
 
-BUILD_PROJECT_FILE="$SCRIPT_DIR/build/_build.csproj"
-TEMP_DIRECTORY="$SCRIPT_DIR//.nuke/temp"
+BUILD_PROJECT_FILE="${SCRIPT_DIR}/eng/build/_build.csproj"
+TEMP_DIRECTORY="${SCRIPT_DIR}/.nuke/temp"
 
-DOTNET_GLOBAL_FILE="$SCRIPT_DIR//global.json"
+DOTNET_GLOBAL_FILE="$SCRIPT_DIR/global.json"
 DOTNET_INSTALL_URL="https://dot.net/v1/dotnet-install.sh"
 DOTNET_CHANNEL="Current"
 

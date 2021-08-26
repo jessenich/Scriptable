@@ -1,15 +1,11 @@
-﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+
 using Scriptable.Utilities;
 
 namespace Scriptable.Streams {
     internal sealed class MergedLinesEnumerable : IEnumerable<string> {
-        private readonly TextReader _standardOutput, _standardError;
+        private readonly TextReader _standardOutput;
+        private readonly TextReader _standardError;
         private int _consumed;
 
         public MergedLinesEnumerable(TextReader standardOutput, TextReader standardError) {
@@ -26,9 +22,7 @@ namespace Scriptable.Streams {
             return this.GetEnumeratorInternal();
         }
 
-        IEnumerator IEnumerable.GetEnumerator() {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         private IEnumerator<string> GetEnumeratorInternal() {
             var tasks = new List<ReaderAndTask>(2);
@@ -75,7 +69,8 @@ namespace Scriptable.Streams {
             // phase 2: finish reading the remaining stream
 
             string line;
-            while ((line = remaining.ReadLine()) != null) yield return line;
+            while ((line = remaining.ReadLine()) != null)
+                yield return line;
         }
 
         private struct ReaderAndTask : IEquatable<ReaderAndTask> {
@@ -91,13 +86,9 @@ namespace Scriptable.Streams {
                 return this.Reader == that.Reader && this.Task == that.Task;
             }
 
-            public override bool Equals(object obj) {
-                return obj is ReaderAndTask that && this.Equals(that);
-            }
+            public override bool Equals(object obj) => obj is ReaderAndTask that && this.Equals(that);
 
-            public override int GetHashCode() {
-                return this.Reader.GetHashCode() ^ this.Task.GetHashCode();
-            }
+            public override int GetHashCode() => this.Reader.GetHashCode() ^ this.Task.GetHashCode();
         }
     }
 }
