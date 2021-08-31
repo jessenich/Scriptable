@@ -1,7 +1,8 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
 
-namespace LinuxAPI {
+namespace Scriptable.LinuxAPI.Extensions {
     public static class ProcessExtensions {
         public static void AddEnvironmentVariables(this ProcessStartInfo process, string prefix) {
             var envVars = new StringDictionary();

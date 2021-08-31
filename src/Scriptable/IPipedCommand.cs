@@ -1,5 +1,8 @@
-namespace Scriptable;
+namespace Scriptable
+{
 
-internal interface IPipedCommand : IShellCommand {
-    string ToString();
+    internal interface IPipedCommand : IShellCommand
+    {
+        string ToString();
+    }
 }

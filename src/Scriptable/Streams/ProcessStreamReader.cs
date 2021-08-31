@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,8 +50,9 @@ namespace Scriptable.Streams {
             }
 
             private IEnumerator<string> GetEnumeratorInternal() {
-                string line;
-                while ((line = this._reader.ReadLine()) != null) yield return line;
+                string? line;
+                while ((line = this._reader.ReadLine()) != null)
+                    yield return line;
             }
 
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
@@ -101,11 +102,11 @@ namespace Scriptable.Streams {
         /// </summary>
         public Task PipeToAsync(ICollection<string> lines, bool leaveReaderOpen = false) {
             Throw.IfNull(lines, "lines");
-
             return this.PipeAsync(
                 async () => {
                     string line;
-                    while ((line = await this.ReadLineAsync().ConfigureAwait(false)) != null) lines.Add(line);
+                    while ((line = await this.ReadLineAsync().ConfigureAwait(false)) != null)
+                        lines.Add(line);
                 },
                 leaveReaderOpen
             );

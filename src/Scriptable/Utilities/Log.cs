@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace Scriptable.Utilities {
     internal static class Log {

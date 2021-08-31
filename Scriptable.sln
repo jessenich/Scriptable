@@ -7,11 +7,27 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable", "src\Scriptabl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable.Test", "test\Scriptable.Test\Scriptable.Test.csproj", "{EDC9189A-B627-4268-B0FA-48C5A89921B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable.Compiler", "eng\build\Scriptable.Compiler.csproj", "{C14699BE-2352-46C9-9DEF-C688A1A43DDC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable.API", "src\Api\Scriptable.API.csproj", "{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriptable.API", "Api\Scriptable.API.csproj", "{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable.LinuxAPI", "src\LinuxAPI\Scriptable.LinuxAPI.csproj", "{89C94CA4-FA4A-40D2-9CE0-1D034FF4FBC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriptable.LinuxAPI", "LinuxAPI\Scriptable.LinuxAPI.csproj", "{89C94CA4-FA4A-40D2-9CE0-1D034FF4FBC6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{E4B11D57-641F-497E-9443-BACB5FEBC330}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{86F7AAC8-F1EB-4A40-8463-E92B6B4D6281}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-test-release.yml = .github\workflows\build-test-release.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{95A7447F-22C3-45CF-B68B-DC77E8BD94C3}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		.gitpod.yml = .gitpod.yml
+		global.json = global.json
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,26 +36,27 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2E30C1C-6997-4E40-8F4C-4174BA3CF2C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C14699BE-2352-46C9-9DEF-C688A1A43DDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C14699BE-2352-46C9-9DEF-C688A1A43DDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDC9189A-B627-4268-B0FA-48C5A89921B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89C94CA4-FA4A-40D2-9CE0-1D034FF4FBC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{89C94CA4-FA4A-40D2-9CE0-1D034FF4FBC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89C94CA4-FA4A-40D2-9CE0-1D034FF4FBC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89C94CA4-FA4A-40D2-9CE0-1D034FF4FBC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89C94CA4-FA4A-40D2-9CE0-1D034FF4FBC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{86F7AAC8-F1EB-4A40-8463-E92B6B4D6281} = {E4B11D57-641F-497E-9443-BACB5FEBC330}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C8B53EAD-5CF3-435A-B5F9-721B3B3FB134}

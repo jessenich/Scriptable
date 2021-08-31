@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -82,10 +82,12 @@ namespace Scriptable.Streams {
             // update bytes available
             switch (this._bytesAvailableSignal.CurrentCount) {
                 case 0:
-                    if (this._count > 0 || this._writerClosed) this._bytesAvailableSignal.Release();
+                    if (this._count > 0 || this._writerClosed)
+                        this._bytesAvailableSignal.Release();
                     break;
                 case 1:
-                    if (this._count == 0 && !this._writerClosed) this._bytesAvailableSignal.Wait();
+                    if (this._count == 0 && !this._writerClosed)
+                        this._bytesAvailableSignal.Wait();
                     break;
                 default:
                     throw new InvalidOperationException("Should never get here");
@@ -113,7 +115,8 @@ namespace Scriptable.Streams {
             Throw.IfInvalidBuffer(buffer, offset, count);
 
             // always respect cancellation, even in the sync flow
-            if (cancellationToken.IsCancellationRequested) return CreateCanceledTask();
+            if (cancellationToken.IsCancellationRequested)
+                return CreateCanceledTask();
 
             if (count == 0)
                 // if we didn't want to write anything, return immediately
@@ -157,7 +160,8 @@ namespace Scriptable.Streams {
 
                 // acquire the semaphore
                 var acquired = await this._spaceAvailableSignal!.WaitAsync(timeoutToUse, cancellationTokenToUse).ConfigureAwait(false);
-                if (!acquired) throw new TimeoutException("Timed out writing to the pipe");
+                if (!acquired)
+                    throw new TimeoutException("Timed out writing to the pipe");
 
                 // we need to reacquire the lock after the await since we might have switched threads
                 lock (this._lock) {
@@ -176,7 +180,8 @@ namespace Scriptable.Streams {
         }
 
         private void WriteNoLock(byte[] buffer, int offset, int count) {
-            if (count <= 0) throw new InvalidOperationException("Sanity check: WriteNoLock requires positive count");
+            if (count <= 0)
+                throw new InvalidOperationException("Sanity check: WriteNoLock requires positive count");
 
             this.EnsureCapacityNoLock(unchecked(this._count + count));
 
@@ -190,10 +195,12 @@ namespace Scriptable.Streams {
         }
 
         private void EnsureCapacityNoLock(int capacity) {
-            if (capacity < 0) throw new IOException("Pipe stream is too long");
+            if (capacity < 0)
+                throw new IOException("Pipe stream is too long");
 
             var currentCapacity = this._buffer.Length;
-            if (capacity <= currentCapacity) return;
+            if (capacity <= currentCapacity)
+                return;
 
             if (this._spaceAvailableSignal != null
              && capacity > MaxStableSize)
@@ -207,7 +214,7 @@ namespace Scriptable.Streams {
                 var doubleCapacity = 2L * currentCapacity;
                 newCapacity = capacity >= doubleCapacity
                     ? capacity
-                    : (int) Math.Min(doubleCapacity, int.MaxValue);
+                    : (int)Math.Min(doubleCapacity, int.MaxValue);
             }
 
             var newBuffer = new byte[newCapacity];
@@ -221,7 +228,8 @@ namespace Scriptable.Streams {
         private void CloseWriteSide() {
             lock (this._lock) {
                 // no-op if we're already closed
-                if (this._writerClosed) return;
+                if (this._writerClosed)
+                    return;
 
                 // if we don't have an active write task, close now
                 if (this._writeTask.IsCompleted) {
@@ -261,20 +269,24 @@ namespace Scriptable.Streams {
             Throw.IfInvalidBuffer(buffer, offset, count);
 
             // always respect cancellation, even in the sync flow
-            if (cancellationToken.IsCancellationRequested) return CreateCanceledTask();
+            if (cancellationToken.IsCancellationRequested)
+                return CreateCanceledTask();
 
             // if we didn't want to read anything, return immediately
-            if (count == 0) return CompletedZeroTask;
+            if (count == 0)
+                return CompletedZeroTask;
 
             lock (this._lock) {
                 Throw<ObjectDisposedException>.If(this._readerClosed, "The read side of the pipe is closed");
                 Throw<InvalidOperationException>.If(!this._readTask.IsCompleted, "Concurrent reads are not allowed");
 
                 // if we have bytes, read them and return synchronously
-                if (this._count > 0) return Task.FromResult(this.ReadNoLock(buffer, offset, count));
+                if (this._count > 0)
+                    return Task.FromResult(this.ReadNoLock(buffer, offset, count));
 
                 // if we don't have bytes and no more are coming, return 0
-                if (this._writerClosed) return CompletedZeroTask;
+                if (this._writerClosed)
+                    return CompletedZeroTask;
 
                 // otherwise, create and return an async read task
                 return this._readTask = this.ReadNoLockAsync(buffer, offset, count, timeout, cancellationToken);
@@ -283,7 +295,8 @@ namespace Scriptable.Streams {
 
         private async Task<int> ReadNoLockAsync(byte[] buffer, int offset, int count, TimeSpan timeout, CancellationToken cancellationToken) {
             var acquired = await this._bytesAvailableSignal.WaitAsync(timeout, cancellationToken).ConfigureAwait(false);
-            if (!acquired) throw new TimeoutException("Timed out reading from the pipe");
+            if (!acquired)
+                throw new TimeoutException("Timed out reading from the pipe");
 
             // we need to reacquire the lock after the await since we might have switched threads
             lock (this._lock) {
@@ -319,7 +332,8 @@ namespace Scriptable.Streams {
         private void CloseReadSide() {
             lock (this._lock) {
                 // no-op if we're already closed
-                if (this._readerClosed) return;
+                if (this._readerClosed)
+                    return;
 
                 // if we don't have an active read task, close now
                 if (this._readTask.IsCompleted) {
@@ -330,7 +344,7 @@ namespace Scriptable.Streams {
                 // otherwise, close as a continuation on the read task
                 this._readTask = this._readTask.ContinueWith(
                     (t, state) => {
-                        var @this = (Pipe) state;
+                        var @this = ((Pipe?)state) ?? throw new NullReferenceException();
                         lock (@this._lock) {
                             @this.InternalCloseReadSideNoLock();
                         }
@@ -382,24 +396,23 @@ namespace Scriptable.Streams {
                 this._pipe = pipe;
             }
 
-            #if !NETSTANDARD1_3
-            public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+            public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state) {
                 throw WriteOnly();
             }
 
-            public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+            public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state) {
                 // according to the docs, the callback is optional
                 var writeTask = this.WriteAsync(buffer, offset, count, CancellationToken.None);
                 var writeResult = new AsyncWriteResult(state, writeTask, this);
-                if (callback != null) writeTask.ContinueWith(_ => callback(writeResult));
+                if (callback != null)
+                    writeTask.ContinueWith(_ => callback(writeResult));
                 return writeResult;
             }
-            #endif
 
             private sealed class AsyncWriteResult : IAsyncResult {
-                private readonly object _state;
+                private readonly object? _state;
 
-                public AsyncWriteResult(object state, Task writeTask, PipeInputStream stream) {
+                public AsyncWriteResult(object? state, Task writeTask, PipeInputStream stream) {
                     this._state = state;
                     this.WriteTask = writeTask;
                     this.Stream = stream;
@@ -409,7 +422,7 @@ namespace Scriptable.Streams {
 
                 public Stream Stream { get; }
 
-                object IAsyncResult.AsyncState => this._state;
+                object? IAsyncResult.AsyncState => this._state;
 
                 WaitHandle IAsyncResult.AsyncWaitHandle => this.WriteTask.As<IAsyncResult>().AsyncWaitHandle;
 
@@ -423,21 +436,22 @@ namespace Scriptable.Streams {
             public override bool CanTimeout => true;
             public override bool CanWrite => true;
 
-            #if !NETSTANDARD1_3
+#if !NETSTANDARD1_3
             public override void Close() {
                 base.Close(); // calls Dispose(true)
             }
-            #endif
+#endif
 
             public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken) {
                 throw WriteOnly();
             }
 
             protected override void Dispose(bool disposing) {
-                if (disposing) this._pipe.CloseWriteSide();
+                if (disposing)
+                    this._pipe.CloseWriteSide();
             }
 
-            #if !NETSTANDARD1_3
+#if !NETSTANDARD1_3
             public override int EndRead(IAsyncResult asyncResult) {
                 throw WriteOnly();
             }
@@ -448,7 +462,7 @@ namespace Scriptable.Streams {
                                ?? throw new ArgumentException("must be created by this stream's BeginWrite method", nameof(asyncResult));
                 writeResult.WriteTask.Wait();
             }
-            #endif
+#endif
 
             public override void Flush() {
                 // no-op, since we are just a buffer
@@ -517,7 +531,8 @@ namespace Scriptable.Streams {
             public override int WriteTimeout {
                 get => this._writeTimeout;
                 set {
-                    if (value != Timeout.Infinite) Throw.IfOutOfRange(value, "WriteTimeout", 0);
+                    if (value != Timeout.Infinite)
+                        Throw.IfOutOfRange(value, "WriteTimeout", 0);
                     this._writeTimeout = value;
                 }
             }
@@ -538,15 +553,16 @@ namespace Scriptable.Streams {
                 this._pipe = pipe;
             }
 
-            #if !NETSTANDARD1_3
+#if !NETSTANDARD1_3
             public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
                 // according to the docs, the callback is optional
                 var readTask = this.ReadAsync(buffer, offset, count, CancellationToken.None);
                 var readResult = new AsyncReadResult(state, readTask, this);
-                if (callback != null) readTask.ContinueWith(_ => callback(readResult));
+                if (callback != null)
+                    readTask.ContinueWith(_ => callback(readResult));
                 return readResult;
             }
-            #endif
+#endif
 
             private sealed class AsyncReadResult : IAsyncResult {
                 private readonly object _state;
@@ -570,22 +586,22 @@ namespace Scriptable.Streams {
                 bool IAsyncResult.IsCompleted => this.ReadTask.IsCompleted;
             }
 
-            #if !NETSTANDARD1_3
+#if !NETSTANDARD1_3
             public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
                 throw ReadOnly();
             }
-            #endif
+#endif
 
             public override bool CanRead => true;
             public override bool CanSeek => false;
             public override bool CanTimeout => true;
             public override bool CanWrite => false;
 
-            #if !NETSTANDARD1_3
+#if !NETSTANDARD1_3
             public override void Close() {
                 base.Close(); // calls Dispose(true)
             }
-            #endif
+#endif
 
             public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken) {
                 // the base implementation is reasonable
@@ -593,10 +609,11 @@ namespace Scriptable.Streams {
             }
 
             protected override void Dispose(bool disposing) {
-                if (disposing) this._pipe.CloseReadSide();
+                if (disposing)
+                    this._pipe.CloseReadSide();
             }
 
-            #if !NETSTANDARD1_3
+#if !NETSTANDARD1_3
             public override int EndRead(IAsyncResult asyncResult) {
                 Throw.IfNull(asyncResult, nameof(asyncResult));
                 var readResult = asyncResult as AsyncReadResult
@@ -607,7 +624,7 @@ namespace Scriptable.Streams {
             public override void EndWrite(IAsyncResult asyncResult) {
                 throw ReadOnly();
             }
-            #endif
+#endif
 
             public override void Flush() {
                 throw ReadOnly();
@@ -630,7 +647,8 @@ namespace Scriptable.Streams {
                 }
                 catch (AggregateException ex) {
                     // unwrap aggregate if we can
-                    if (ex.InnerExceptions.Count == 1) ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                    if (ex.InnerExceptions.Count == 1)
+                        ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
 
                     throw;
                 }
@@ -650,7 +668,8 @@ namespace Scriptable.Streams {
             public override int ReadTimeout {
                 get => this._readTimeout;
                 set {
-                    if (value != Timeout.Infinite) Throw.IfOutOfRange(value, "ReadTimeout", 0);
+                    if (value != Timeout.Infinite)
+                        Throw.IfOutOfRange(value, "ReadTimeout", 0);
                     this._readTimeout = value;
                 }
             }

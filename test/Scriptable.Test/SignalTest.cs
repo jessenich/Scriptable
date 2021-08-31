@@ -1,28 +1,23 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using Scriptable;
+
 using Scriptable.Signals;
 using Scriptable.Utilities;
-using Scriptable.Streams;
 
-namespace Scriptable.Test
-{
+namespace Scriptable.Test {
     using static UnitTestHelpers;
 
-    public class SignalTest
-    {
+    public class SignalTest {
         [Test]
-        public async Task CanSendControlC()
-        {
+        public async Task CanSendControlC() {
             var command = TestShell.Run(SampleCommand, "sleep", "10000");
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 WindowsProcessSignaler.HasSameConsole(command.ProcessId).ShouldEqual(false, "sanity check console setup");
             }
 
@@ -32,8 +27,7 @@ namespace Scriptable.Test
         }
 
         [Test]
-        public async Task CanSendControlCToPipeline()
-        {
+        public async Task CanSendControlCToPipeline() {
             var command = TestShell.Run(SampleCommand, "sleep", "10000")
                 | TestShell.Run(SampleCommand, "pipe")
                 | TestShell.Run(SampleCommand, "pipe");
@@ -43,8 +37,7 @@ namespace Scriptable.Test
         }
 
         [Test]
-        public async Task HandlesEdgeCases()
-        {
+        public async Task HandlesEdgeCases() {
             var command = TestShell.Run(SampleCommand, "sleep", "10000");
             Assert.Throws<ArgumentNullException>(() => command.TrySignalAsync(null!).GetType());
 
@@ -57,10 +50,8 @@ namespace Scriptable.Test
         }
 
         [Test]
-        public async Task CanSendUnixSignal([Values(3 /* SIGQUIT */, 6 /* SIGABORT */, 9 /* SIGKILL */)] int unixSignal)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
+        public async Task CanSendUnixSignal([Values(3 /* SIGQUIT */, 6 /* SIGABORT */, 9 /* SIGKILL */)] int unixSignal) {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 Assert.Pass("tests unix-specific behavior");
             }
 
@@ -72,42 +63,32 @@ namespace Scriptable.Test
         }
 
         [TestCaseSource(nameof(GetCtrlTypes))]
-        public async Task CanSendSignalToSelf(int signal)
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
+        public async Task CanSendSignalToSelf(int signal) {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 Assert.Pass("Tests windows-specific behavior");
             }
 
             ShellCommand.TryAttachToProcess(ProcessHelper.CurrentProcessId, out var thisCommand).ShouldEqual(true);
 
-            using (var manualResetEvent = new ManualResetEventSlim(initialState: false))
-            {
-                NativeMethods.ConsoleCtrlDelegate handler = receivedSignal =>
-                {
-                    if ((int)receivedSignal == signal)
-                    {
-                        manualResetEvent.Set();
-                        return true; // handled
-                    }
-                    return false;
-                };
-                if (!NativeMethods.SetConsoleCtrlHandler(handler, add: true))
-                {
-                    Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+            using var manualResetEvent = new ManualResetEventSlim(initialState: false);
+            NativeMethods.ConsoleCtrlDelegate handler = receivedSignal => {
+                if ((int)receivedSignal == signal) {
+                    manualResetEvent.Set();
+                    return true; // handled
                 }
+                return false;
+            };
+            if (!NativeMethods.SetConsoleCtrlHandler(handler, add: true)) {
+                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+            }
 
-                try
-                {
-                    (await thisCommand!.TrySignalAsync(CommandSignal.FromSystemValue(signal))).ShouldEqual(true);
-                    manualResetEvent.Wait(TimeSpan.FromSeconds(5)).ShouldEqual(true);
-                }
-                finally
-                {
-                    if (!NativeMethods.SetConsoleCtrlHandler(handler, add: false))
-                    {
-                        Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-                    }
+            try {
+                (await thisCommand!.TrySignalAsync(CommandSignal.FromSystemValue(signal))).ShouldEqual(true);
+                manualResetEvent.Wait(TimeSpan.FromSeconds(5)).ShouldEqual(true);
+            }
+            finally {
+                if (!NativeMethods.SetConsoleCtrlHandler(handler, add: false)) {
+                    Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
                 }
             }
         }

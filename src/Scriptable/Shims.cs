@@ -1,3 +1,5 @@
+using System;
+
 namespace Scriptable {
     [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
     internal sealed class NotNullWhenAttribute : Attribute {

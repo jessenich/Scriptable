@@ -25,7 +25,7 @@ namespace Scriptable {
                 process.Kill();
             }
             catch (Exception ex) {
-                Log.WriteLine("Exception killing process: " + ex);
+                Log.WriteLine($"Exception killing process: {ex}");
             }
         }
 
@@ -54,9 +54,13 @@ namespace Scriptable {
             object? resultObject = null;
 
             if (cancellationToken.CanBeCanceled)
-                disposables.Add(cancellationToken.Register(() => {
-                    if (Interlocked.CompareExchange(ref resultObject, CanceledSentinel, null) == null) TryKillProcess(process); // if cancellation wins the race, kill the process
+            {
+                disposables.Add(cancellationToken.Register(() =>
+                {
+                    if (Interlocked.CompareExchange(ref resultObject, CanceledSentinel, null) == null)
+                        TryKillProcess(process); // if cancellation wins the race, kill the process
                 }));
+            }
 
             if (timeout != Timeout.InfiniteTimeSpan) {
                 var timeoutSource = new CancellationTokenSource(timeout);

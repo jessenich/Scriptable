@@ -1,6 +1,6 @@
-﻿namespace LinuxAPI {
+namespace Scriptable.LinuxAPI.Services {
     public interface IEventSource {
         string? Identifier { get; }
-        CancellationTokenSource? Reference { get; }
+        object? Reference { get; }
     }
 }

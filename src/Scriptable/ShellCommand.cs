@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Scriptable.Signals;
 using Scriptable.Streams;
 using Scriptable.Utilities;
@@ -450,14 +454,17 @@ namespace Scriptable {
 
         private int _disposed;
 
+#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
         /// <summary>
         /// Releases all resources associated with this <see cref="ShellCommand"/>. This is only required
         /// if the <see cref="Shell.ShellOptions.DisposeOnExit"/> has been set to false
         /// </summary>
+
         void IDisposable.Dispose() {
             if (Interlocked.Exchange(ref this._disposed, 1) == 0)
                 this.DisposeInternal();
         }
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
 
         /// <summary>
         /// Subclass-specific implementation of <see cref="IDisposable.Dispose"/>

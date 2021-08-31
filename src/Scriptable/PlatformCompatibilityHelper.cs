@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+
 using Scriptable.Streams;
 
 namespace Scriptable {
@@ -11,17 +12,16 @@ namespace Scriptable {
 
         public static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        public static CommandLineSyntax GetDefaultCommandLineSyntax() {
-            if (IsMono && !IsWindows) return new MonoUnixCommandLineSyntax();
-            return new WindowsCommandLineSyntax();
-        }
+        public static CommandLineSyntax GetDefaultCommandLineSyntax() => IsMono && !IsWindows ?
+            new MonoUnixCommandLineSyntax() :
+            new WindowsCommandLineSyntax();
 
-        public static Stream WrapStandardInputStreamIfNeeded(Stream stream) {
-            return IsMono || !IsWindows ? new CompatibilityStandardInputWrapperStream(stream) : stream;
-        }
+        public static Stream WrapStandardInputStreamIfNeeded(Stream stream) => IsMono || !IsWindows ?
+            new CompatibilityStandardInputWrapperStream(stream) :
+            stream;
 
         public static int SafeGetExitCode(this Process process) {
-            if (IsMono)
+            if (IsMono) {
                 // an oddity of Mono is that it cannot return an exit code of -1; interpreting this as something
                 // else. Unfortunately, this is what we get when calling Kill() on a .NET process on Windows. This
                 // hack works around the issue. See https://github.com/mono/mono/blob/master/mcs/class/referencesource/System/services/monitoring/system/diagnosticts/Process.cs
@@ -33,6 +33,7 @@ namespace Scriptable {
                     when (ex.Message == "Cannot get the exit code from a non-child process on Unix") {
                     return -1;
                 }
+            }
 
             return process.ExitCode;
         }
@@ -62,7 +63,7 @@ namespace Scriptable {
                 // other types of IOExceptions (e. g. FileNotFoundException, PathTooLongException) that could in
                 // theory be thrown here and trigger this
                 when (IsMono && ex.GetType() == typeof(IOException)) {
-                standardInput = redirectStandardInput ? new StreamWriter(Stream.Null, Console.InputEncoding) {AutoFlush = true} : null;
+                standardInput = redirectStandardInput ? new StreamWriter(Stream.Null, Console.InputEncoding) { AutoFlush = true } : null;
                 standardOutput = redirectStandardOutput ? new StreamReader(Stream.Null, Console.OutputEncoding) : null;
                 standardError = redirectStandardError ? new StreamReader(Stream.Null, Console.OutputEncoding) : null;
                 return false;

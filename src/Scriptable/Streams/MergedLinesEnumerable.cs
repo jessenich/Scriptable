@@ -1,5 +1,10 @@
+using System;
 using System.Collections;
-
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Scriptable.Utilities;
 
 namespace Scriptable.Streams {
@@ -68,7 +73,7 @@ namespace Scriptable.Streams {
 
             // phase 2: finish reading the remaining stream
 
-            string line;
+            string? line;
             while ((line = remaining.ReadLine()) != null)
                 yield return line;
         }
@@ -80,7 +85,7 @@ namespace Scriptable.Streams {
             }
 
             public TextReader Reader { get; }
-            public Task<string> Task { get; }
+            public Task<string?> Task { get; }
 
             public bool Equals(ReaderAndTask that) {
                 return this.Reader == that.Reader && this.Task == that.Task;

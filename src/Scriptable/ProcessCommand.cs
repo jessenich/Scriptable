@@ -1,8 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Text;
-
+using System.Threading;
+using System.Threading.Tasks;
 using Scriptable.Streams;
 using Scriptable.Utilities;
 
@@ -33,7 +37,7 @@ namespace Scriptable {
 
             this._process.SafeStart(out var processStandardInput, out var processStandardOutput, out var processStandardError);
 
-            var ioTasks = new List<Task>(2);
+            var ioTasks = new List<SystemTask>(2);
             if (processStandardOutput != null) {
                 this._standardOutputReader = new InternalProcessStreamReader(processStandardOutput);
                 ioTasks.Add(this._standardOutputReader.Task);

@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
-
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 using Scriptable.Utilities;
@@ -94,6 +98,7 @@ namespace Scriptable.Test {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize", Justification = "No managed resources to dispose of.")]
         public void Dispose() {
             TearDown();
         }

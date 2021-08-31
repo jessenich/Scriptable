@@ -1,5 +1,8 @@
-namespace Scriptable;
+namespace Scriptable
+{
 
-internal interface IIOCommand : IShellCommand {
-    string ToString();
+    internal interface IIOCommand : IShellCommand
+    {
+        string ToString();
+    }
 }

@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Scriptable.Streams {
     internal sealed class InternalProcessStreamReader : ProcessStreamReader {
@@ -85,27 +87,19 @@ namespace Scriptable.Streams {
             return this._reader.ReadAsync(buffer, index, count);
         }
 
-        public override int ReadBlock(char[] buffer, int index, int count) {
-            return this._reader.ReadBlock(buffer, index, count);
-        }
+        public override int ReadBlock(char[] buffer, int index, int count) => this._reader.ReadBlock(buffer, index, count);
 
-        public override Task<int> ReadBlockAsync(char[] buffer, int index, int count) {
-            return this._reader.ReadBlockAsync(buffer, index, count);
-        }
+        public override Task<int> ReadBlockAsync(char[] buffer, int index, int count) => this._reader.ReadBlockAsync(buffer, index, count);
 
-        public override string ReadLine() {
-            return this._reader.ReadLine();
-        }
+        public override string? ReadLine() => this._reader.ReadLine();
 
-        public override Task<string> ReadLineAsync() => this._reader.ReadLineAsync() ?? Task.FromResult(string.Empty);
+        public override Task<string?> ReadLineAsync() => this._reader.ReadLineAsync();
 
         public override string ReadToEnd() {
             return this._reader.ReadToEnd();
         }
 
-        public override Task<string> ReadToEndAsync() {
-            return this._reader.ReadToEndAsync();
-        }
+        public override Task<string> ReadToEndAsync() => this._reader.ReadToEndAsync();
 
         protected override void Dispose(bool disposing) {
             if (disposing)

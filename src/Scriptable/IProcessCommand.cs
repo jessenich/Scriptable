@@ -1,5 +1,8 @@
-namespace Scriptable;
+namespace Scriptable
+{
 
-internal interface IProcessCommand : IShellCommand {
-    string ToString();
+    internal interface IProcessCommand : IShellCommand
+    {
+        string ToString();
+    }
 }
