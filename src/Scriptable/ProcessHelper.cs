@@ -57,7 +57,7 @@ namespace Scriptable {
             {
                 disposables.Add(cancellationToken.Register(() =>
                 {
-                    if (Interlocked.CompareExchange(ref resultObject, CanceledSentinel, null) == null)
+                    if (Interlocked.CompareExchange(ref resultObject, _canceledSentinel, null) == null)
                         TryKillProcess(process); // if cancellation wins the race, kill the process
                 }));
             }
@@ -73,7 +73,7 @@ namespace Scriptable {
 
             processMonitoringTask.ContinueWith(
                 _ => {
-                    var resultObjectValue = Interlocked.CompareExchange(ref resultObject, CompletedSentinel, null);
+                    var resultObjectValue = Interlocked.CompareExchange(ref resultObject, _completedSentinel, null);
                     if (resultObjectValue == null)
                         // process completed naturally
                         // try-catch because in theory any process property access could fail if someone
@@ -88,7 +88,7 @@ namespace Scriptable {
                         catch (Exception ex) {
                             taskBuilder.SetException(ex);
                         }
-                    else if (resultObjectValue == CanceledSentinel)
+                    else if (resultObjectValue == _canceledSentinel)
                         taskBuilder.SetCanceled(cancellationToken);
                     else
                         taskBuilder.SetException((Exception) resultObjectValue);
@@ -102,7 +102,7 @@ namespace Scriptable {
             return taskBuilder.Task;
         }
 
-        private static readonly object CompletedSentinel = new(),
-                                       CanceledSentinel = new();
+        private static readonly object _completedSentinel = new();
+        private static readonly object _canceledSentinel = new();
     }
 }

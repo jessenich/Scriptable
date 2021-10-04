@@ -1,27 +1,22 @@
 name: Build / Test / Release
 
+
 on:
   push:
     tags:
-      - v*
-      - "*-alpha"
-      - "*-beta"
-      - "*-new"
-      - "*-preview"
-    branches:
-      - main
-      - master
-      - dev
-      - release/*
+      - "v*"
+
+env:
+  DOTNET_NO_LOGO: true
 
 jobs:
   build-scriptable-library:
     name: Build Scriptable Project
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: pwsh
-        working-directory: ./src/Scriptable
+    env:
+      RELEASE_CONFIGURATION: DEBUG
+      PROJECT: ./src/Scriptable/Scriptable.csproj
+      TEST: ./tests/Scriptable.Test/Scriptable.Test.csproj
     permissions:
       contents: read
       packages: write
@@ -34,97 +29,136 @@ jobs:
         with:
           dotnet-version: 5.0.x
 
-      - name: Build, Test, Publish, Pack
-        run: >
-          dotnet restore ${{ env.PROJECT }}
-          
-          dotnet build \ 
-            --nologo \ 
-            --no-restore \
-            --configuration ${{ env.RELEASE_CONFIGURATION }} \
-            ${{ env.PROJECT }}
+      - name: Dotnet Restore
+        run: |
+         dotnet restore "${{ env.PROJECT }}"
+         dotnet restore "${{ env.TEST }}"
 
-          dotnet test --nologo --list-tests
-          dotnet test \
-              --nologo \
-              --no-build \
-              --verbosity detailed \
-              --configuration ${{ env.RELEASE_CONFIGURATION }} \
-              --logger "html;LogFileName=logs/scriptable-test-logfile.html" \
-              --results-directory results \
-              ${{ env.TEST }}
-          
+      - name: Build Scriptable Library
+        run: dotnet build --no-restore --configuration ${{ env.RELEASE_CONFIGURATION }}" "${{ env.PROJECT }}";
+
+      - name: List All Tests
+        run: dotnet test --nologo --no-build --list-tests "${{ env.TEST }}"
+
+      - name: Test Scriptable Library
+        if: ${{ env.RELEASE_CONFIGURATION == 'DEBUG' }}
+        run: |
+          test ! -d "${{ env.TEST_LOGFILE }}" && mkdir -p "${{ env.TEST_LOGFILE }}";
+          test ! -d "${{ env.TEST_RESULTS_DIR }}" && mkdir -p "${{ env.TEST_RESULTS_DIR }}";
+          dotnet test --no-build --verbosity detailed --configuration "${{ env.RELEASE_CONFIGURATION }}" --logger "html;LogFileName=${{ env.TEST_LOGFILE }}" --results-directory "${{ env.TEST_RESULTS_DIR }}" "$TEST_PROJ";
+        env:
+          TEST_LOGFILE: ./logs/scriptable-test-logfile.html
+          TEST_RESULTS_DIR: ./results
+
+      - name: Publish Scriptable Library (No Self Containment)
+        run: |
+          test ! -d "${{ env.PUBLISH_PATH }}" && mkdir -p "${{ env.PUBLISH_PATH }}";
           dotnet publish \
             --nologo \
             --no-build \
             --no-self-contained \
-            --configuration ${{ env.RELEASE_ONFIGURATION }}
+            --configuration ${{ env.RELEASE_CONFIGURATION }}
             --output publish/no-containment/ \
             --verbosity detailed \
-            ${{ env.PROJECT }}
+            "${{ env.PROJECT }}"
 
+          echo "::set-output name=PUBLISH_PATH::$(echo "${{ env.PUBLISH_PATH }})"
+        env:
+          PUBLISH_PATH: ./publish/no-containment
+          
+      - name: Publish Scriptable Library (Self Contained)
+        run: |
+          test ! -d "${{ env.PUBLISH_PATH }}" && mkdir -p "${{ env.PUBLISH_PATH }}";
           dotnet publish \
             --nologo \
             --no-build \
             --no-restore \
             --self-contained \
-            --configuration ${{ env.RELEASE_ONFIGURATION }}
-            --output publish/self-contained \
+            --configuration "${{ env.RELEASE_CONFIGURATION }}" \
+            --output "${{ env.PUBLISH_PATH }}" \
             --verbository detailed \
-            ${{ env.PROJECT }}
+            "${{ env.PROJECT }}"
           
-          dotnet pack \ 
+          echo "::set-output name=PUBLISH_PATH::$(echo "${{ env.PUBLISH_PATH }})"
+        env:
+          PUBLISH_PATH: ./publish/self-contained
+
+      - name: Pack Scriptable Project (Full)
+        run: |
+          test ! -d "${{ env.OUTPUT_PATH }}" && mkdir -p "${{ env.OUTPUT_PATH }}";
+          dotnet pack \
             --nologo \
             --no-build \
             --no-restore \
             --include-symbols \
-            --include-source \ 
-            --output pack/full \
-            --configuration ${{ env.RELEASE_CONFIGURATION }} \
+            --include-source \
+            --output "${{ env.OUTPUT_PATH }}"" \
+            --configuration "${{ env.RELEASE_CONFIGURATION }}" \
             --force \
-            ${{ env.PROJECT }}
+            "${{ env.PROJECT }}"
 
-          dotnet pack \ 
+          echo "::set-output name=OUTPUT_PATH::$(echo "${{ env.OUTPUT_PATH }})"
+        env:
+          OUTPUT_PATH: ./pack/full
+
+      - name: Pack Scriptable Project (Symbols-Only)
+        run: |
+          test ! -d "${{ env.OUTPUT_PATH }}" && mkdir -p "${{ env.OUTPUT_PATH }}";
+          dotnet pack \
             --nologo \
             --no-build \
             --no-restore \
             --include-symbols \
-            --output pack/symbols-only
-            --configuration ${{ env.RELEASE_CONFIGURATION }} \
+            --output 
+            --configuration "${{ env.RELEASE_CONFIGURATION }}" \
             --force \
-            ${{ env.PROJECT }}
+            "${{ env.PROJECT }}"
 
-          dotnet pack \ 
+          echo "::set-output name=OUTPUT_PATH::$(echo "${{ env.OUTPUT_PATH }})"
+        env:
+          OUTPUT_PATH: ./pack/symbols-only
+
+      - name: Pack Scriptable Project (Source-Only)
+        run: |
+          test ! -d "${{ env.OUTPUT_PATH }}" && mkdir -p "${{ env.OUTPUT_PATH }}";
+          dotnet pack \
             --nologo \
             --no-build \
             --no-restore \
             --include-source \
-            --output pack/source-only \
-            --configuration ${{ env.RELEASE_CONFIGURATION }} \
+            --output "${{ env.OUTPUT_PATH }}" \
+            --configuration "${{ env.RELEASE_CONFIGURATION }}" \
             --force \
-            ${{ env.PROJECT }}
+            "${{ env.PROJECT }}";
 
-          dotnet pack \ 
+          echo "::set-output name=OUTPUT_PATH::$(echo "${{ env.OUTPUT_PATH }})"
+        env:
+          OUTPUT_PATH: ./pack/source-only
+
+      - name: Pack Scriptable Project (Production)
+        run: |
+          test ! -d "${{ env.OUTPUT_PATH }}" && mkdir -p "${{ env.OUTPUT_PATH }}";
+          dotnet pack \
               --nologo \
               --no-build \
               --no-restore \
-              --output pack/no-symbols-no-source
-              --configuration ${{ env.RELEASE_CONFIGURATION }} \
+              --output "${{ env.OUTPUT_PATH }}" \
+              --configuration "${{ env.RELEASE_CONFIGURATION }}" \
               --force \
-              ${{ env.PROJECT }}
+              "${{ env.PROJECT }}"
+
+          echo "::set-output name=OUTPUT_PATH::$(echo "${{ env.OUTPUT_PATH }})"
         env:
-          RELEASE_CONFIGURATION: Debug
-          PROJECT: ./src/Scriptable/Scriptable.csproj
-          TEST: ./tests/SCriptable.Test/Scriptable.Test.csproj
-        
+            OUTPUT_PATH: ./pack/no-symbols-no-source
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: library
+          name: scriptable-library
           path: |
-            bin/**
-            publish/**
-            pack/**
-            tests/logs/**
-            tests/results/**
+            **/bin/**
+            **/publish/**
+            **/pack/**
+            **/tests/logs/**
+            **/tests/results/**
           if-no-files-found: error

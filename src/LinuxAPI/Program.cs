@@ -1,31 +1,30 @@
 using System;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Core.Serialization;
+using Scriptable.LinuxAPI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
-using Scriptable.LinuxAPI.Services;
+
+#pragma warning disable 649
+// ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
+// ReSharper disable ArrangeTypeMemberModifiers
 
 namespace Scriptable.LinuxAPI {
     public static class Program {
-        private static readonly object _lock = new object();
+        private static readonly object _lock = new();
 
+        private static readonly ILoggerFactory _hostLoggerFactory;
         private static readonly ILogger _hostLogger;
         private static readonly CancellationTokenSource _appCancellationTokenSource;
-        private static readonly CancellationTokenSource _sigTermCancellationTokenSource;
+        private static readonly SigTermCancellationHandler _signalHandler;
         private static readonly object? _cancellationRequesterReference;
 
         static Program() {
             lock (_lock) {
-                _hostLogger = LoggerFactory.Create(cfg => cfg
+                _hostLoggerFactory = LoggerFactory.Create(cfg => cfg
                     .AddDebug()
                     .AddSimpleConsole(consoleCfg => {
                         consoleCfg.ColorBehavior = LoggerColorBehavior.Enabled;
@@ -35,15 +34,16 @@ namespace Scriptable.LinuxAPI {
                     }).AddSystemdConsole(systemCfg => {
                         systemCfg.IncludeScopes = true;
                         systemCfg.UseUtcTimestamp = true;
-                    })).CreateLogger("HostLogger");
+                    }));
 
-                _sigTermCancellationTokenSource = new CancellationTokenSource();
-                _sigTermCancellationTokenSource.Token.Register(_ => _appCancellationTokenSource!.Cancel(true), new CancellationRequestState() {
+                _hostLogger = _hostLoggerFactory.CreateLogger("HostLogger");
+                _signalHandler = new SigTermCancellationHandler(_hostLoggerFactory.CreateLogger<SigTermCancellationHandler>());
+                _signalHandler.CancellationToken.Register(_ => _appCancellationTokenSource!.Cancel(true), new CancellationRequestState() {
                     Requester = new DefaultEventSource() {
                         Identifier = nameof(_cancellationRequesterReference),
                         Reference = _cancellationRequesterReference
                     },
-                    TokenSource = _sigTermCancellationTokenSource
+                    TokenSource = _appCancellationTokenSource
                 });
 
                 _appCancellationTokenSource = new CancellationTokenSource();
@@ -60,7 +60,6 @@ namespace Scriptable.LinuxAPI {
         }
 
         public static Task Main() {
-            Console.CancelKeyPress += Console_CancelKeyPress;
 
             var builder = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
@@ -83,17 +82,7 @@ namespace Scriptable.LinuxAPI {
                             ));
                 });
             var host = builder.Build();
-            Console.CancelKeyPress += Console_CancelKeyPress;
             return host.StartAsync(_appCancellationTokenSource.Token);
-        }
-
-
-        private static void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e) {
-            if (!e.Cancel)
-                return;
-
-            _cancellationRequesterReference = sender;
-            _sigTermCancellationTokenSource.Cancel(true);
         }
     }
 }
