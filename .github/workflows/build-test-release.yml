@@ -16,7 +16,7 @@ jobs:
     env:
       RELEASE_CONFIGURATION: DEBUG
       PROJECT: ./src/Scriptable/Scriptable.csproj
-      TEST: ./tests/Scriptable.Test/Scriptable.Test.csproj
+      TEST: ./test/Scriptable.Test/Scriptable.Test.csproj
     permissions:
       contents: read
       packages: write
