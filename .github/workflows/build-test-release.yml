@@ -35,7 +35,7 @@ jobs:
          dotnet restore "${{ env.TEST }}"
 
       - name: Build Scriptable Library
-        run: dotnet build --no-restore --configuration ${{ env.RELEASE_CONFIGURATION }}" "${{ env.PROJECT }}";
+        run: dotnet build --no-restore --configuration "${{ env.RELEASE_CONFIGURATION }}" "${{ env.PROJECT }}";
 
       - name: List All Tests
         run: dotnet test --nologo --no-build --list-tests "${{ env.TEST }}"
