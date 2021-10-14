@@ -38,6 +38,8 @@ jobs:
         run: dotnet build --no-restore --configuration "${{ env.RELEASE_CONFIGURATION }}" "${{ env.PROJECT }}";
 
       - name: List All Tests
+        ## Disable temporarily.
+        if: ${{ env.RELEASE_CONFIGURATION == 'DEBUG' && false }}
         run: dotnet test --nologo --no-build --list-tests "${{ env.TEST }}"
 
       - name: Test Scriptable Library
