@@ -11,12 +11,18 @@ env:
 
 jobs:
   build-scriptable-library:
-    name: Build Scriptable Project
+    strategy:
+      matrix:
+        configuration:
+          - Debug
+          - Release
+    name: Build Scriptable Project [${{ matrix.configuration }}]
     runs-on: ubuntu-latest
     env:
-      RELEASE_CONFIGURATION: DEBUG
+      RELEASE_CONFIGURATION: ${{ matrix.configuration }}
       PROJECT: ./src/Scriptable/Scriptable.csproj
       TEST: ./test/Scriptable.Test/Scriptable.Test.csproj
+
     permissions:
       contents: read
       packages: write
@@ -31,19 +37,24 @@ jobs:
 
       - name: Dotnet Restore
         run: |
-         dotnet restore "${{ env.PROJECT }}"
-         dotnet restore "${{ env.TEST }}"
+          if [ ${{ matrix.configuration }} == "Release" ]; then
+            dotnet restore "${{ env.PROJECT }}"
+          elif [ ${{ matrix.configuration }} == "Debug" ]; then
+            dotnet restore "${{ env.TEST }}"
+          fi
+
+
 
       - name: Build Scriptable Library
         run: dotnet build --no-restore --configuration "${{ env.RELEASE_CONFIGURATION }}" "${{ env.PROJECT }}";
 
-      #- name: List All Tests
-      #  ## Disable temporarily.
-      #  if: ${{ env.RELEASE_CONFIGURATION == 'DEBUG' && false }}
-      #  run: dotnet test --nologo --no-build --list-tests "${{ env.TEST }}"
+      # - name: List All Tests
+      #   ## Disable temporarily.
+      #   if: ${{ env.RELEASE_CONFIGURATION == 'DEBUG' && false }}
+      #   run: dotnet test --nologo --no-build --list-tests "${{ env.TEST }}"
 
       - name: Test Scriptable Library
-        if: ${{ env.RELEASE_CONFIGURATION == 'DEBUG' }}
+        if: ${{ env.RELEASE_CONFIGURATION == 'Debug' }}
         run: |
           test ! -d "${{ env.TEST_LOGFILE }}" && mkdir -p "${{ env.TEST_LOGFILE }}";
           test ! -d "${{ env.TEST_RESULTS_DIR }}" && mkdir -p "${{ env.TEST_RESULTS_DIR }}";
@@ -67,7 +78,7 @@ jobs:
           echo "::set-output name=PUBLISH_PATH::$(echo "${{ env.PUBLISH_PATH }})"
         env:
           PUBLISH_PATH: ./publish/no-containment
-          
+
       - name: Publish Scriptable Library (Self Contained)
         run: |
           test ! -d "${{ env.PUBLISH_PATH }}" && mkdir -p "${{ env.PUBLISH_PATH }}";
@@ -80,7 +91,7 @@ jobs:
             --output "${{ env.PUBLISH_PATH }}" \
             --verbository detailed \
             "${{ env.PROJECT }}"
-          
+
           echo "::set-output name=PUBLISH_PATH::$(echo "${{ env.PUBLISH_PATH }})"
         env:
           PUBLISH_PATH: ./publish/self-contained
@@ -111,7 +122,7 @@ jobs:
             --no-build \
             --no-restore \
             --include-symbols \
-            --output 
+            --output
             --configuration "${{ env.RELEASE_CONFIGURATION }}" \
             --force \
             "${{ env.PROJECT }}"
