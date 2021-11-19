@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable", "src\Scriptabl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable.Test", "test\Scriptable.Test\Scriptable.Test.csproj", "{EDC9189A-B627-4268-B0FA-48C5A89921B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable.API", "src\Api\Scriptable.API.csproj", "{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable.API", "src\API\Scriptable.API.csproj", "{ECCF7F34-9D5F-4673-B8A9-9219047E48B0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriptable.LinuxAPI", "src\LinuxAPI\Scriptable.LinuxAPI.csproj", "{89C94CA4-FA4A-40D2-9CE0-1D034FF4FBC6}"
 EndProject
