@@ -16,10 +16,16 @@ jobs:
         configuration:
           - Debug
           - Release
+        builder:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+          
     name: Build Scriptable Project [${{ matrix.configuration }}]
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.builder }}
     env:
       RELEASE_CONFIGURATION: ${{ matrix.configuration }}
+      SLN: ./src/Scriptable.sln
       PROJECT: ./src/Scriptable/Scriptable.csproj
       TEST: ./test/Scriptable.Test/Scriptable.Test.csproj
 
@@ -36,46 +42,48 @@ jobs:
           dotnet-version: 5.0.x
 
       - name: Dotnet Restore
-        run: |
-          if [ ${{ matrix.configuration }} == "Release" ]; then
-            dotnet restore "${{ env.PROJECT }}"
-          elif [ ${{ matrix.configuration }} == "Debug" ]; then
-            dotnet restore "${{ env.TEST }}"
-          fi
-
-
+        run: dotnet restore "${{ env.SLN }}"
 
       - name: Build Scriptable Library
-        run: dotnet build --no-restore --configuration "${{ env.RELEASE_CONFIGURATION }}" "${{ env.PROJECT }}";
-
-      # - name: List All Tests
-      #   ## Disable temporarily.
-      #   if: ${{ env.RELEASE_CONFIGURATION == 'DEBUG' && false }}
-      #   run: dotnet test --nologo --no-build --list-tests "${{ env.TEST }}"
-
+        run: dotnet build -c "${{ env.RELEASE_CONFIGURATION }}" "${{ env.SLN }}";
+        
+  test-scriptable-project:
+    env:
+      CONFIG: Debug
+      TEST: './src/Scriptable.Test/Scriptable.Test.csproj'
+    strategy:
+      matrix:
+        builder:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ${{ matrix.builder }}
+    steps:
       - name: Test Scriptable Library
         if: ${{ env.RELEASE_CONFIGURATION == 'Debug' }}
-        run: |
-          test ! -d "${{ env.TEST_LOGFILE }}" && mkdir -p "${{ env.TEST_LOGFILE }}";
-          test ! -d "${{ env.TEST_RESULTS_DIR }}" && mkdir -p "${{ env.TEST_RESULTS_DIR }}";
-          dotnet test --no-build --verbosity detailed --configuration "${{ env.RELEASE_CONFIGURATION }}" --logger "html;LogFileName=${{ env.TEST_LOGFILE }}" --results-directory "${{ env.TEST_RESULTS_DIR }}" "$TEST_PROJ";
+        run: dotnet test --verbosity detailed -c "${{ env.RELEASE_CONFIGURATION }}" --logger "html;LogFileName=${{ env.TEST_LOGFILE }}" --results-directory "${{ env.TEST_RESULTS_DIR }}" "${{ env.SLN }}";
         env:
           TEST_LOGFILE: ./logs/scriptable-test-logfile.html
           TEST_RESULTS_DIR: ./results
 
       - name: Publish Scriptable Library (No Self Containment)
+        if: ${{ matrix.RELEASE_CONFIGURATION = 'Release' }}
         run: |
-          test ! -d "${{ env.PUBLISH_PATH }}" && mkdir -p "${{ env.PUBLISH_PATH }}";
+          if [[ ! -d "${{ env.PUBLISH_PATH }}" ]]; then
+              mkdir -p "${{ env.PUBLISH_PATH }}";
+          fi
+          
           dotnet publish \
-            --nologo \
-            --no-build \
             --no-self-contained \
-            --configuration ${{ env.RELEASE_CONFIGURATION }}
+            -c ${{ env.RELEASE_CONFIGURATION }}
             --output publish/no-containment/ \
             --verbosity detailed \
             "${{ env.PROJECT }}"
 
-          echo "::set-output name=PUBLISH_PATH::$(echo "${{ env.PUBLISH_PATH }})"
+          echo "::set-output name=PUBLISH_PATH::${{ env.PUBLISH_PATH }}"
         env:
           PUBLISH_PATH: ./publish/no-containment
 
@@ -92,7 +100,7 @@ jobs:
             --verbository detailed \
             "${{ env.PROJECT }}"
 
-          echo "::set-output name=PUBLISH_PATH::$(echo "${{ env.PUBLISH_PATH }})"
+          echo "::set-output name=PUBLISH_PATH::${{ env.PUBLISH_PATH }}"
         env:
           PUBLISH_PATH: ./publish/self-contained
 
