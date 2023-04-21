@@ -2,7 +2,7 @@
 
   <PropertyGroup>
       <Title>Scriptable.Test</Title>
-      <TargetFramework>net5.0</TargetFramework>
+      <TargetFramework>net7.0</TargetFramework>
       <IsPackable>false</IsPackable>
       <LangVersion>Latest</LangVersion>
       <Nullable>enable</Nullable>
@@ -11,12 +11,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <PackageReference Include="nunit" Version="3.13.2" />
-      <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
-      <PackageReference Include="Moq" Version="4.16.1" />
+      <PackageReference Include="nunit" Version="3.13.3" />
+      <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+      <PackageReference Include="Moq" Version="4.18.4" />
       <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-      <PackageReference Include="System.Management" Version="5.0.0" />
+      <PackageReference Include="System.Management" Version="7.0.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -39,7 +39,7 @@ namespace Scriptable {
 
         /// <summary>
         /// Starts the given <paramref name="process"/> and captures the standard IO streams. This method works around Mono.Android-specific
-        /// issue https://github.com/madelson/MedallionShell/issues/22, where a process that exits quickly causes the initialization of
+        /// issue, where a process that exits quickly causes the initialization of
         /// the standard input writer to fail (since setting AutoFlush = true triggers a write which on Mono crashes for a closed process).
         ///
         /// If https://github.com/mono/mono/issues/8478 is ever addressed, we wouldn't need this any more.
@@ -52,8 +52,7 @@ namespace Scriptable {
             try {
                 process.Start();
 
-                // adding this code allows for a sort-of replication of
-                // https://github.com/madelson/MedallionShell/issues/22 on non-Android platforms
+                // adding this code allows for a sort-of replication of on non-Android platforms
                 // process.StandardInput.BaseStream.Write(new byte[1000], 0, 1000);
                 // process.StandardInput.BaseStream.Flush();
             }

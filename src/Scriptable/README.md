@@ -24,7 +24,7 @@ Most APIs create a `Command` instance by starting a new process. However, you ca
 
 ### Standard IO
 
-One of the main ways to interact with a process is via its [standard IO streams](https://en.wikipedia.org/wiki/Standard_streams) (in, out and error). By default, MedallionShell configures the process to enable these streams and captures standard error and standard output in the `Command`'s result.
+One of the main ways to interact with a process is via its [standard IO streams](https://en.wikipedia.org/wiki/Standard_streams) (in, out and error). By default, Scriptable configures the process to enable these streams and captures standard error and standard output in the `Command`'s result.
 
 Additionally/alternatively, you can interact with these streams directly via the `Command.StandardInput`, `Command.StandardOutput`, and `Command.StandardError` properties. As with `Process`, these are `TextWriter`/`TextReader` objects that also expose the underlying `Stream`, giving you the option of writing/reading either text or raw bytes.
 

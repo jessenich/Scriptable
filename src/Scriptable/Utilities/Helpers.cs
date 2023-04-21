@@ -8,7 +8,7 @@ namespace Scriptable.Utilities {
             return @this;
         }
 
-        public static Assembly GetMedallionShellAssembly() {
+        public static Assembly GetScriptableAssembly() {
             #if NETSTANDARD1_3
             return typeof(Helpers).GetTypeInfo().Assembly;
             #else

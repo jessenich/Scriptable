@@ -84,9 +84,9 @@ namespace Scriptable.Signals {
         }
 
         private static async Task<string> DeploySignalerExeAsync() {
-            const string signalerExeNameWithoutExtension = "MedallionShell.ProcessSignaler";
+            const string signalerExeNameWithoutExtension = "Scriptable.ProcessSignaler";
             var exePath = Path.Combine(Path.GetTempPath(), $"{signalerExeNameWithoutExtension}_{Guid.NewGuid():N}.exe");
-            await using var resourceStream = Helpers.GetMedallionShellAssembly().GetManifestResourceStream(signalerExeNameWithoutExtension + ".exe");
+            await using var resourceStream = Helpers.GetScriptableAssembly().GetManifestResourceStream(signalerExeNameWithoutExtension + ".exe");
             await using var fileStream = new FileStream(exePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, Constants.ByteBufferSize, true);
 
             if (resourceStream?.Length == 0)

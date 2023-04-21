@@ -50,7 +50,7 @@ namespace Scriptable.Test
             return assemblyLocation;
 #else
             // needed on .NET Core to make sure the right config files are alongside SampleCommand.dll
-            return assemblyLocation.Replace("MedallionShell.Tests", "SampleCommand");
+            return assemblyLocation.Replace("Scriptable.Tests", "SampleCommand");
 #endif
         }
 
@@ -90,7 +90,7 @@ namespace Scriptable.Test
         {
             var command = TestShell.Run(SampleCommandPath, "exit", 1);
             command.Wait();
-            string line;
+            string? line;
             if ((line = command.StandardOutput.ReadLine()) != null)
             {
                 throw new InvalidOperationException($"StdOut was '{line}'");

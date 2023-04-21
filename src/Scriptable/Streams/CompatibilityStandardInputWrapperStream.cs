@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 namespace Scriptable.Streams {
     /// <summary>
     /// On .NET Core and .NET Framework on Windows, writing to the standard input <see cref="Stream"/> after the process exits is a noop.
-    /// 
-    /// However, on Mono this will throw a "Write Fault" exception (https://github.com/madelson/MedallionShell/issues/6)
-    /// while .NET Core on Linux throws a "Broken Pipe" exception (https://github.com/madelson/MedallionShell/issues/46).
-    /// 
+    ///
+    /// However, on Mono this will throw a "Write Fault" exception
+    /// while .NET Core on Linux throws a "Broken Pipe" exception
+    ///
     /// This class wraps the underlying <see cref="Stream"/> to provide consistent behavior across platforms.
     /// </summary>
     internal sealed class CompatibilityStandardInputWrapperStream : Stream {
